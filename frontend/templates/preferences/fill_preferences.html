@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>實習公司志願序填寫</title>
+  <style>
+    /* 通用樣式 */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: "Noto Sans TC", sans-serif;
+      background-color: #ffffff;
+      margin: 0;
+      padding: 20px;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 0.5rem;
+    }
+
+    /* 頂端列 */
+    .top-bar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 60px;
+      background-color: #fff;
+      z-index: 1100;
+      display: flex;
+      align-items: center;
+    }
+
+    .top-bar>.container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0 0.5rem;
+      height: 100%;
+      gap: 30px;
+    }
+
+    .top-bar-left #menu-btn {
+      width: 30px;
+      height: 22px;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .top-bar-left #menu-btn span {
+      height: 4px;
+      background-color: #333;
+      border-radius: 2px;
+    }
+
+    .top-bar-right {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: bold;
+    }
+
+    .top-bar-right .btn-link {
+      color: #0066cc;
+      background-color: transparent;
+      border: 1.5px solid #0066cc;
+      padding: 0.3rem 0.7rem;
+      border-radius: 6px;
+      text-decoration: none;
+      transition: background-color 0.3s ease, color 0.3s ease;
+      font-size: 0.9rem;
+    }
+
+    .top-bar-right .btn-link:hover {
+      background-color: #0066cc;
+      color: white;
+    }
+
+    .top-bar-right #login-avatar {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      object-fit: cover;
+      cursor: pointer;
+      margin-top: 6px;
+    }
+
+    header.hero {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 3 / 1;
+      background-image: url('/static/images/title.png');
+      background-size: cover;
+      background-repeat: no-repeat;
+      background-position: center;
+      margin-top: 80px;
+      margin-bottom: 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    main {
+      background-color: #fff;
+      padding: 2rem;
+      margin-bottom: 3rem;
+    }
+
+    /* 表單樣式 */
+    form {
+      max-width: 600px;
+      margin: auto;
+      background: #fff;
+      padding: 40px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      margin-top: 50px;
+    }
+
+    .form-title {
+      font-weight: bold;
+      color: #0066cc;
+      text-align: center;
+      margin: 0 auto 3rem auto;
+      max-width: 1200px;
+    }
+
+    label {
+      font-weight: bold;
+      display: block;
+      margin-top: 20px;
+    }
+
+    select {
+      width: 100%;
+      padding: 10px;
+      margin-top: 5px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+    }
+
+    button {
+      margin-top: 20px;
+      width: 100%;
+      padding: 10px;
+      background-color: #0066cc;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 1em;
+    }
+
+    button:hover {
+      background-color: #0255a9;
+    }
+
+    #editBtn {
+      background-color: #f2f2f2;
+      color: #333;
+      border: 1px solid #999;
+      font-weight: bold;
+    }
+
+    #editBtn:hover {
+      background-color: #ddd;
+      color: black;
+    }
+
+    /* 側邊選單 */
+    #side-menu {
+      position: fixed;
+      top: 0;
+      left: 0;
+      height: 100vh;
+      width: 320px;
+      max-width: 80vw;
+      background-color: rgba(10, 10, 10, 0.95);
+      backdrop-filter: blur(6px);
+      box-shadow: 3px 0 12px rgb(0 0 0 / 0.7);
+      padding: 2rem 1.5rem;
+      transform: translateX(-100%);
+      transition: transform 0.3s ease-in-out;
+      z-index: 1100;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      color: white;
+      user-select: none;
+    }
+
+    #side-menu.open {
+      transform: translateX(0);
+    }
+
+    #close-btn {
+      position: absolute;
+      top: 2rem;
+      right: 1.6rem;
+      font-size: 2.2rem;
+      background: none;
+      border: none;
+      color: white;
+      cursor: pointer;
+      width: 2.5rem;
+      height: 2.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    #side-menu h2 {
+      margin-bottom: 1.5rem;
+      font-size: 1.5rem;
+      font-weight: bold;
+    }
+
+    #side-menu a {
+      color: #ddd;
+      text-decoration: none;
+      padding: 0.5rem 0;
+      width: 100%;
+      display: block;
+      transition: 0.2s;
+    }
+
+    #side-menu a:hover {
+      background-color: rgba(255, 255, 255, 0.15);
+      color: white;
+    }
+
+    /* Toast 浮動通知樣式 */
+    #toast {
+      visibility: hidden;
+      min-width: 250px;
+      background-color: #4CAF50;
+      /* 綠色背景 */
+      color: white;
+      text-align: center;
+      border-radius: 8px;
+      padding: 16px;
+      position: fixed;
+      z-index: 1500;
+      left: 50%;
+      bottom: 30px;
+      transform: translateX(-50%);
+      font-weight: bold;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+      opacity: 0;
+      transition: opacity 0.5s ease, visibility 0.5s;
+    }
+
+    #toast.show {
+      visibility: visible;
+      opacity: 1;
+    }
+
+    #toast {
+      visibility: hidden;
+      min-width: 250px;
+      background-color: #4CAF50;
+      color: white;
+      text-align: center;
+      border-radius: 8px;
+      padding: 16px;
+      position: fixed;
+      z-index: 1500;
+      left: 50%;
+      bottom: 30px;
+      transform: translateX(-50%);
+      font-weight: bold;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+      opacity: 0;
+      transition: opacity 0.5s ease, visibility 0.5s;
+    }
+
+    #toast.show {
+      visibility: visible;
+      opacity: 1;
+    }
+  </style>
+</head>
+
+<body>
+  <!-- 頂部欄 -->
+  <div class="top-bar">
+    <div class="container">
+      <div class="top-bar-left">
+        <div id="menu-btn" title="選單" role="button" tabindex="0">
+          <div id="toast"></div>
+          <span></span><span></span><span></span>
+        </div>
+      </div>
+      <div class="top-bar-right">
+        <a href="/student_home">
+          <img src="{{ url_for('static', filename='images/avatar.png') }}" alt="頭像" id="login-avatar" />
+        </a>
+        <a href="/student_home" class="btn-link">返回主頁</a>
+        <a href="/login" class="btn-link">登出</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast 通知容器 -->
+  <div id="toast"></div>
+
+  <!-- 志願表單 -->
+  <form method="POST" action="/fill_preferences" id="preferencesForm">
+    <h2 class="form-title">請填寫實習公司志願序</h2>
+    {% for i in range(1, 6) %}
+    <label for="preference_{{ i }}">第 {{ i }} 志願</label>
+    <select id="preference_{{ i }}" class="preference-select" name="preference_{{ i }}" required>
+      <option value="">-- 請選擇實習公司 --</option>
+      {% for company in companies %}
+      <option value="{{ company['id'] }}" {% if submitted_preferences and submitted_preferences[i-1]==company['id'] %} selected {% endif %}>
+  {{ company['company_name'] }}（{{ company['job_title'] }}）
+</option>
+      {% endfor %}
+    </select>
+    {% endfor %}
+    <button type="submit" id="submitBtn">送出志願</button>
+    <button type="button" id="editBtn" style="display:none;">修改</button>
+  </form>
+
+  <!-- 側邊選單 -->
+  <nav id="side-menu" aria-hidden="true" role="navigation" aria-label="功能選單">
+    <button id="close-btn" aria-label="關閉功能選單">×</button>
+    <h2>功能選單</h2>
+    <a href="/student_home">首頁</a>
+    <a href="/profile">個人資料</a>
+    <a href="/upload_resume">上傳履歷</a>
+    <a href="/ai_edit_resume">AI修改履歷</a>
+    <a href="/fill_preferences">填寫志願序</a>
+    <a href="/notifications">通知</a>
+  </nav>
+
+  <!-- JS 控制側邊選單開關及志願序選項 -->
+  <script>
+  // 側邊選單開關
+  document.getElementById('menu-btn').addEventListener('click', () => {
+    document.getElementById('side-menu').classList.add('open');
+    document.getElementById('side-menu').setAttribute('aria-hidden', 'false');
+  });
+
+  document.getElementById('close-btn').addEventListener('click', () => {
+    document.getElementById('side-menu').classList.remove('open');
+    document.getElementById('side-menu').setAttribute('aria-hidden', 'true');
+  });
+
+  const selects = document.querySelectorAll('.preference-select');
+  const submitBtn = document.getElementById('submitBtn');
+  const editBtn = document.getElementById('editBtn');
+  const toast = document.getElementById('toast');
+
+  // 更新下拉選單顯示
+  function updateOptions() {
+    const selectedValues = Array.from(selects)
+      .map(s => s.value)
+      .filter(val => val !== '');
+
+    selects.forEach(select => {
+      const currentValue = select.value;
+      Array.from(select.options).forEach(option => {
+        if (option.value === '') {
+          option.hidden = false; // 空白選項要保留
+          return;
+        }
+        // 如果這個值已經被選過，且不是這個 select 的當前值 → 隱藏
+        option.hidden = selectedValues.includes(option.value) && option.value !== currentValue;
+      });
+    });
+  }
+
+  // 當選項改變時即時更新
+  selects.forEach(select => {
+    select.addEventListener('change', updateOptions);
+  });
+
+  // 預先初始化
+  updateOptions();
+
+  function showToast(message) {
+    toast.textContent = message;
+    toast.classList.add('show');
+    setTimeout(() => {
+      toast.classList.remove('show');
+    }, 3000);
+  }
+
+  editBtn.addEventListener('click', () => {
+    selects.forEach(select => select.disabled = false);
+    submitBtn.style.display = 'block';
+    editBtn.style.display = 'none';
+    updateOptions();
+  });
+
+  // ✅ 從後端接收 message
+  let toastMessage = {{ message | tojson | safe | default('null', true) }};
+
+  if (toastMessage) {
+    selects.forEach(select => select.disabled = true);
+    submitBtn.style.display = 'none';
+    editBtn.style.display = 'block';
+    showToast(toastMessage);
+  }
+</script>
+</body>
+
+</html>

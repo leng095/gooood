@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>智慧實習平台 | 選擇登入身分</title>
+  <style>
+    body {
+      font-family: "Segoe UI", "微軟正黑體", sans-serif;
+      background-color: #f3f6f9;
+      margin: 0;
+    }
+
+    .container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    .card {
+      width: 550px;
+      padding: 60px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      background-color: #ffffff;
+      text-align: center;
+    }
+
+    .card h1 {
+      font-size: 35px;
+      font-weight: 700;
+      margin-bottom: 30px;
+      color: #222;
+    }
+
+    .role-button {
+      background-color: #3c91e6;
+      color: white;
+      font-size: 25px;
+      font-weight: bold;
+      border: none;
+      border-radius: 10px;
+      padding: 20px;
+      width: 350px;
+      cursor: pointer;
+      transition: background-color 0.3s ease, transform 0.2s ease;
+      margin: 10px auto;
+      display: block;
+    }
+
+    .role-button:hover {
+      background-color: #2b74c2;
+      transform: translateY(-3px);
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <div class="card">
+      <h1>請選擇登入身分</h1>
+      <div id="role-buttons"></div>
+    </div>
+  </div>
+
+  <script>
+    // 從後端模板注入的角色列表 JSON 字串，Flask 模板要傳入 roles_json
+    const roleList = JSON.parse('{{ roles_json | safe }}');
+
+    function getRoleDisplayName(role) {
+      const roleMap = {
+        "teacher": "教師",
+        "director": "主任",
+      };
+      return roleMap[role] || role;
+    }
+
+    if (!Array.isArray(roleList) || roleList.length === 0) {
+      alert("角色資訊遺失，請重新登入");
+      window.location.href = "/login";
+    } else {
+      const container = document.getElementById("role-buttons");
+
+      roleList.forEach(role => {
+        const btn = document.createElement("button");
+        btn.className = "role-button";
+        btn.textContent = getRoleDisplayName(role);
+        btn.onclick = () => {
+          // 設定 localStorage 中的 selectedRole
+          localStorage.setItem("selectedRole", role);
+          
+          // 按下按鈕後呼叫後端確認角色API
+          fetch('/api/confirm-role', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ role: role })
+          })
+            .then(response => response.json())
+            .then(data => {
+              if (data.success) {
+                window.location.href = data.redirect;
+              } else {
+                alert(data.message || '發生錯誤，請稍後重試');
+              }
+            })
+            .catch(() => {
+              alert('伺服器錯誤，請稍後重試');
+            });
+        };
+        container.appendChild(btn);
+      });
+    }
+  </script>
+</body>
+
+</html>

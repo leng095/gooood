@@ -1,0 +1,644 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>履歷管理平台</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    /* 頂端列 */
+    .top-bar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 60px;
+      background-color: #fff;
+      z-index: 1100;
+      display: flex;
+      align-items: center;
+    }
+
+    /* 頂端列內容 */
+    .top-bar>.container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0 0.5rem;
+      height: 100%;
+      gap: 30px;
+    }
+
+    .top-bar-left #menu-btn {
+      width: 30px;
+      height: 22px;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .top-bar-left #menu-btn span {
+      height: 4px;
+      background-color: #333;
+      border-radius: 2px;
+    }
+
+    .top-bar-right {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: bold;
+    }
+
+    .top-bar-right .btn-link {
+      color: #0066cc;
+      background-color: transparent;
+      border: 1.5px solid #0066cc;
+      padding: 0.3rem 0.7rem;
+      border-radius: 6px;
+      text-decoration: none;
+      transition: background-color 0.3s ease, color 0.3s ease;
+      font-size: 0.9rem;
+    }
+
+    .top-bar-right .btn-link:hover {
+      background-color: #0066cc;
+      color: white;
+    }
+
+    .top-bar-right #login-avatar {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      object-fit: cover;
+      cursor: pointer;
+      margin-top: 4px;
+    }
+
+    /* Hero 區塊 */
+    header.hero {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 3 / 1;
+      background-image: url('/static/images/title.png');
+      background-size: cover;
+      background-repeat: no-repeat;
+      background-position: center;
+      margin-top: 80px;
+      margin-bottom: 2rem;
+      border-radius: 0;
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    body {
+      background-color: #ffffff;
+      font-family: "Noto Sans TC", sans-serif;
+      margin-top: 80px;
+    }
+
+    .card {
+      box-shadow: 0 0 12px rgba(0, 0, 0, 0.05);
+    }
+
+    .card h4.text-center {
+      color: #0066cc;
+      font-weight: bold;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: auto;
+    }
+
+    .btn-group .btn.active {
+      font-weight: bold;
+    }
+
+    .status-badge {
+      font-size: 0.9em;
+    }
+
+    #resumeFileDrop {
+      border: 2px dashed #ccc;
+      border-radius: 8px;
+      padding: 30px;
+      text-align: center;
+      color: #888;
+      cursor: pointer;
+      transition: border-color 0.3s;
+    }
+
+    #resumeFileDrop.dragover {
+      border-color: #0d6efd;
+      color: #0d6efd;
+    }
+
+    /* 表頭置中 */
+    table thead th {
+      text-align: center;
+      vertical-align: middle;
+    }
+
+    /* 所有表格欄位預設置中 */
+    table td {
+      text-align: center;
+      vertical-align: middle;
+    }
+
+    /* 評語和備註欄高度與對齊調整 */
+    td.comment-cell .view-text,
+    td.note-cell .view-text {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 40px;
+      height: 40px;
+      text-align: center;
+      word-break: break-word;
+      white-space: pre-wrap;
+    }
+
+    td.comment-cell .text-muted,
+    td.note-cell .text-muted {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      width: 100%;
+      min-height: 40px;
+      text-align: center;
+      word-break: break-word;
+      white-space: pre-wrap;
+    }
+
+
+    td.comment-cell textarea,
+    td.note-cell textarea {
+      width: 100%;
+      resize: vertical;
+      font-size: 1.2em;
+      text-align: center;
+      box-sizing: border-box;
+      font-family: inherit;
+      padding: 0.4rem;
+    }
+
+    td.comment-cell button,
+    td.note-cell button {
+      margin-top: 0.2rem;
+      font-size: 0.85em;
+      padding: 0.2rem 0.5rem;
+    }
+
+    /* 顯示用的 view-text（例如備註） */
+    .view-text span {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 40px;
+      /* 和父層 min-height 一致 */
+    }
+
+    /* 已填寫的文字樣式 */
+    .view-text span {
+      color: #198754;
+      /* 綠色代表已填寫 */
+    }
+
+    /* 未填寫的文字樣式 */
+    .view-text span.text-muted {
+      color: #6c757d;
+    }
+
+    /* 編輯器浮出樣式 */
+    .editor-box {
+      position: absolute;
+      top: 0;
+      left: 0;
+      z-index: 10;
+      background-color: #fff;
+      border: 1px solid #ddd;
+      padding: 0.5rem;
+      width: 100%;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    /* 側邊選單 */
+    #side-menu {
+      position: fixed;
+      top: 0;
+      left: 0;
+      height: 100vh;
+      width: 320px;
+      max-width: 80vw;
+      background-color: rgba(10, 10, 10, 0.95);
+      backdrop-filter: blur(6px);
+      box-shadow: 3px 0 12px rgb(0 0 0 / 0.7);
+      padding: 2rem 1.5rem;
+      transform: translateX(-100%);
+      transition: transform 0.3s ease-in-out;
+      z-index: 1100;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      color: white;
+      user-select: none;
+    }
+
+    #side-menu.open {
+      transform: translateX(0);
+    }
+
+    #close-btn {
+      position: absolute;
+      top: 2rem;
+      right: 1.6rem;
+      font-size: 2.2rem;
+      background: none;
+      border: none;
+      color: white;
+      cursor: pointer;
+      line-height: 1;
+      width: 2.5rem;
+      height: 2.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    #side-menu h2 {
+      width: 100%;
+      margin-bottom: 1.5rem;
+      font-weight: 700;
+      font-size: 1.5rem;
+      text-align: left;
+    }
+
+    #side-menu a {
+      display: block;
+      width: 100%;
+      padding: 0.5rem 0;
+      font-size: 1.1rem;
+      color: #ddd;
+      text-decoration: none;
+      border-radius: 4px;
+      transition: background-color 0.2s ease;
+    }
+
+    #side-menu a:hover {
+      background-color: rgba(255, 255, 255, 0.15);
+      color: white;
+    }
+  </style>
+</head>
+
+<body>
+  <!-- 頂部欄 -->
+  <div class="top-bar">
+    <div class="container">
+      <div class="top-bar-left">
+        <div id="menu-btn" title="選單" role="button" tabindex="0">
+          <span></span><span></span><span></span>
+        </div>
+      </div>
+      <div class="top-bar-right">
+        <a href="/student_home">
+          <img src="{{ url_for('static', filename='images/avatar.png') }}" alt="頭像" id="login-avatar" />
+        </a>
+        <a href="/student_home" class="btn-link">返回主頁</a>
+        <a href="/login" class="btn-link">登出</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="container my-5">
+    <!-- 上傳區塊 -->
+    <div class="card p-4 mb-4">
+      <h4 class="mb-3 text-center">上傳履歷</h4>
+      <div id="resumeFileDrop">拖曳檔案至此或點擊選擇（限 PDF / Word，最大 5MB）</div>
+      <input type="file" id="resumeFile" accept=".pdf,.doc,.docx" hidden />
+      <div class="mt-3 d-flex justify-content-between align-items-center">
+        <span id="fileInfo" class="text-muted">尚未選擇檔案</span>
+        <button class="btn btn-primary" id="uploadBtn" disabled>上傳</button>
+      </div>
+      <div class="mt-3"><strong>審查進度：</strong><span id="reviewStatus" class="text-muted">尚未上傳</span></div>
+    </div>
+
+    <!-- 篩選按鈕 -->
+    <div class="btn-group mb-3 w-100" role="group">
+      <button class="btn btn-outline-secondary active" onclick="filterStatus('all', this)">全部</button>
+      <button class="btn btn-outline-info" id="uploadedCountBtn" onclick="filterStatus('uploaded', this)">已上傳</button>
+      <button class="btn btn-outline-success" id="approvedCountBtn"
+        onclick="filterStatus('approved', this)">審查完成</button>
+      <button class="btn btn-outline-danger" id="rejectedCountBtn" onclick="filterStatus('rejected', this)">已退件</button>
+    </div>
+
+    <!-- 清單區塊 -->
+    <div class="card p-3">
+      <table class="table table-hover align-middle mb-0">
+        <thead class="table-light">
+          <tr>
+            <th>上傳時間</th>
+            <th>檔案名稱</th>
+            <th>狀態</th>
+            <th>老師留言</th>
+            <th>學生備註</th>
+            <th>操作</th>
+          </tr>
+        </thead>
+        <tbody id="resumeTableBody">
+          <tr>
+            <td colspan="6" class="text-center text-muted">載入中...</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <!-- 側邊選單 -->
+  <nav id="side-menu" aria-hidden="true" role="navigation" aria-label="功能選單">
+    <button id="close-btn" aria-label="關閉功能選單">×</button>
+    <h2>功能選單</h2>
+    <a href="/student_home">首頁</a>
+    <a href="/profile">個人資料</a>
+    <a href="/upload_resume">上傳履歷</a>
+    <a href="/ai_edit_resume">AI修改履歷</a>
+    <a href="/fill_preferences">填寫志願序</a>
+    <a href="/notifications">通知</a>
+  </nav>
+
+  <script>
+    let resumesData = [];
+    let resumeId = null;
+    let interval = null;
+    const role = localStorage.getItem('role') || 'student';
+
+    // 拖曳上傳
+    const dropZone = document.getElementById('resumeFileDrop');
+    const fileInput = document.getElementById('resumeFile');
+    dropZone.addEventListener('click', () => fileInput.click());
+    dropZone.addEventListener('dragover', e => {
+      e.preventDefault();
+      dropZone.classList.add('dragover');
+    });
+    dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
+    dropZone.addEventListener('drop', e => {
+      e.preventDefault();
+      dropZone.classList.remove('dragover');
+      fileInput.files = e.dataTransfer.files;
+      handleFileChange();
+    });
+    fileInput.addEventListener('change', handleFileChange);
+
+    function handleFileChange() {
+      const file = fileInput.files[0];
+      if (!file) return;
+      document.getElementById('fileInfo').textContent = `${file.name} (${(file.size / 1024 / 1024).toFixed(2)} MB)`;
+      document.getElementById('uploadBtn').disabled = file.size > 5 * 1024 * 1024;
+    }
+
+    document.getElementById('uploadBtn').addEventListener('click', () => {
+      const file = fileInput.files[0];
+      if (!file) return alert("請選擇檔案");
+      const formData = new FormData();
+      formData.append('resume', file);
+      formData.append('username', localStorage.getItem('username') || 'testuser');
+
+      updateStatusText('uploaded');
+
+      fetch('/api/upload_resume', { method: 'POST', body: formData })
+        .then(res => res.json())
+        .then(data => {
+          if (data.success && data.resume_id) {
+            resumeId = data.resume_id;
+            loadResumes();
+            if (interval) clearInterval(interval);
+            interval = setInterval(fetchStatus, 5000);
+          } else {
+            alert("上傳失敗");
+          }
+        });
+    });
+
+    function fetchStatus() {
+      if (!resumeId) return;
+      fetch(`/api/resume_status?resume_id=${resumeId}`)
+        .then(res => res.json())
+        .then(data => {
+          if (data.success) updateStatusText(data.status);
+        });
+    }
+
+    function updateStatusText(status) {
+      const el = document.getElementById('reviewStatus');
+      const map = {
+        uploaded: ['已上傳，待審查', '#0d6efd'],
+        reviewing: ['審查中', '#ffc107'],
+        approved: ['審查完成', '#198754'],
+        rejected: ['已退件', '#dc3545']
+      };
+      el.textContent = map[status]?.[0] || '尚未上傳';
+      el.style.color = map[status]?.[1] || '#6c757d';
+    }
+
+    function loadResumes() {
+      fetch(`/api/get_student_resumes?username=${localStorage.getItem('username')}`)
+        .then(res => res.json())
+        .then(data => {
+          if (data.success) {
+            resumesData = data.resumes;
+            renderTable('all');
+          }
+        });
+    }
+
+    function filterStatus(filter, btn) {
+      document.querySelectorAll('.btn-group .btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      renderTable(filter);
+    }
+
+
+    function renderTable(filter) {
+      const tbody = document.getElementById('resumeTableBody');
+      tbody.innerHTML = '';
+      // 計算各個狀態的數量
+      const statusCounts = {
+        uploaded: resumesData.filter(r => r.status === 'uploaded').length,
+        reviewing: resumesData.filter(r => r.status === 'reviewing').length,
+        approved: resumesData.filter(r => r.status === 'approved').length,
+        rejected: resumesData.filter(r => r.status === 'rejected').length
+      };
+
+      // 更新篩選按鈕文字
+      document.getElementById('uploadedCountBtn').textContent = `已上傳 (${statusCounts.uploaded})`;
+      document.getElementById('approvedCountBtn').textContent = `審查完成 (${statusCounts.approved})`;
+      document.getElementById('rejectedCountBtn').textContent = `已退件 (${statusCounts.rejected})`;
+
+      const commentPlaceholder = '請輸入留言...';
+
+      const notePlaceholder = '請輸入備註...';
+
+      const filtered = filter === 'all' ? resumesData : resumesData.filter(r => r.status === filter);
+      if (filtered.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" class="text-center text-muted">無資料</td></tr>`;
+        return;
+      }
+      filtered.forEach(r => {
+        // 留言欄：學生可查看，不能編輯
+        const commentView = ` 
+    <div class="view-text" onclick="showCommentEditor(this, ${r.id})" style="cursor:pointer;">
+      <span class="${r.comment?.trim() ? '' : 'text-muted'}">${r.comment?.trim() ? '請查看' : '無內容'}</span>
+    </div>
+    <div class="editor-box" style="display:none;">
+      <textarea readonly style="background-color:#f9f9f9;" placeholder="無內容">${escapeHtml(r.comment)}</textarea><br/>
+      <button class="btn btn-sm btn-secondary" onclick="cancelEdit(this)">返回</button>
+    </div>
+  `;
+
+        // 備註欄：學生可編輯
+        const noteView = `
+    <div class="view-text" onclick="showNoteEditor(this, ${r.id})" style="cursor:pointer;">
+      <span class="${r.note?.trim() ? '' : 'text-muted'}">${r.note?.trim() ? '已填寫' : '未填寫'}</span>
+    </div>
+    <div class="editor-box" style="display:none;">
+      <textarea onkeydown="handleNoteKeydown(event, this, ${r.id})" placeholder="請輸入備註...">${escapeHtml(r.note)}</textarea><br/>
+      <button class="btn btn-sm btn-primary" onclick="submitNote(this, ${r.id})">送出</button>
+      <button class="btn btn-sm btn-secondary" onclick="cancelEdit(this)">取消</button>
+    </div>
+  `;
+
+        tbody.innerHTML += `
+    <tr>
+      <td>${new Date(r.upload_time).toLocaleString()}</td>
+      <td>${r.original_filename}</td>
+      <td><span class="badge bg-${statusColor(r.status)} status-badge">${mapStatus(r.status)}</span></td>
+      <td class="comment-cell">${commentView}</td>
+      <td class="note-cell">${noteView}</td>
+      <td>
+        <a href="/api/download_resume?resume_id=${r.id}" class="btn btn-outline-primary btn-sm me-1">下載</a>
+        <button class="btn btn-outline-danger btn-sm" onclick="deleteResume(${r.id})">刪除</button>
+      </td>
+    </tr>
+  `;
+      });
+
+    }
+
+    function mapStatus(status) {
+      return {
+        uploaded: '已上傳',
+        reviewing: '審查中',
+        approved: '完成',
+        rejected: '退件'
+      }[status] || '未知';
+    }
+
+    function statusColor(status) {
+      return {
+        uploaded: 'info',
+        reviewing: 'warning',
+        approved: 'success',
+        rejected: 'danger'
+      }[status] || 'secondary';
+    }
+
+    function deleteResume(id) {
+      if (!confirm("確定要刪除這份履歷？")) return;
+      fetch(`/api/delete_resume?resume_id=${id}`, { method: 'DELETE' })
+        .then(res => res.json())
+        .then(data => {
+          if (data.success) loadResumes();
+          else alert("刪除失敗");
+        });
+    }
+
+    function showCommentEditor(container, id) {
+      const td = container.closest('td');
+      td.querySelector('.view-text').style.display = 'none';
+      td.querySelector('.editor-box').style.display = 'block';
+      td.querySelector('textarea').focus();
+    }
+
+    function showNoteEditor(container, id) {
+      const td = container.closest('td');
+      td.querySelector('.view-text').style.display = 'none';
+      td.querySelector('.editor-box').style.display = 'block';
+      td.querySelector('textarea').focus();
+    }
+
+    function submitComment(btn, id) {
+      if (role === 'student') {
+        alert("學生不可編輯留言");
+        cancelEdit(btn);
+        return;
+      }
+      const td = btn.closest('td');
+      const newVal = td.querySelector('textarea').value.trim();
+      updateField(id, 'comment', newVal, td);
+    }
+
+    function submitNote(btn, id) {
+      const td = btn.closest('td');
+      const newVal = td.querySelector('textarea').value.trim();
+      updateField(id, 'note', newVal, td);
+    }
+
+    function cancelEdit(btn) {
+      const td = btn.closest('td');
+      td.querySelector('.editor-box').style.display = 'none';
+      td.querySelector('.view-text').style.display = 'flex';
+    }
+
+    function escapeHtml(text) {
+      if (!text) return '';
+      return text.replace(/&/g, "&amp;").replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;").replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
+    function updateField(id, field, value, td) {
+      fetch('/api/update_resume_field', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ resume_id: id, field, value })
+      })
+        .then(res => res.json())
+        .then(data => {
+          if (data.success) {
+            td.querySelector('.view-text span').textContent = value ? '已填寫' : '未填寫';
+            td.querySelector('.view-text span').className = value ? '' : 'text-muted';
+            td.querySelector('.editor-box').style.display = 'none';
+            td.querySelector('.view-text').style.display = 'flex';
+          } else {
+            alert("更新失敗");
+          }
+        });
+    }
+    document.addEventListener("DOMContentLoaded", loadResumes);
+  </script>
+  <!-- JS 控制開關 -->
+  <script>
+    document.getElementById('menu-btn').addEventListener('click', () => {
+      document.getElementById('side-menu').classList.add('open');
+    });
+
+    document.getElementById('close-btn').addEventListener('click', () => {
+      document.getElementById('side-menu').classList.remove('open');
+    });
+  </script>
+</body>
+</body>
+
+</html>
