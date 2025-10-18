@@ -1,6 +1,7 @@
 from flask import Flask, redirect, url_for, session
 from flask_cors import CORS
 from jinja2 import ChoiceLoader, FileSystemLoader
+
 import os
 
 # -------------------------
@@ -38,6 +39,8 @@ from admin import admin_bp
 from users import users_bp
 from notification import notification_bp
 from preferences import preferences_bp
+from announcement import announcement_bp
+
 
 # 註冊 Blueprint
 app.register_blueprint(auth_bp)
@@ -47,6 +50,7 @@ app.register_blueprint(admin_bp)
 app.register_blueprint(users_bp)
 app.register_blueprint(notification_bp)
 app.register_blueprint(preferences_bp)
+app.register_blueprint(announcement_bp, url_prefix="/announcement")
 
 # -------------------------
 # 首頁路由（使用者前台）
@@ -70,4 +74,7 @@ def admin_index():
 # 主程式入口
 # -------------------------
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000, debug=True)
+    try:
+        app.run(host="0.0.0.0", port=5000, debug=True)
+    except (KeyboardInterrupt, SystemExit):
+        pass  # No scheduler to shut down

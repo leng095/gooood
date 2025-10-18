@@ -2,438 +2,737 @@
 <html lang="zh-Hant">
 
 <head>
-    <meta charset="UTF-8" />
-    <title>主任審核公司</title>
-    <style>
-        /* 通用樣式 */
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
+  <meta charset="UTF-8" />
+  <title>主任審核公司</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <style>
+    body {
+      font-family: "Noto Sans TC", sans-serif;
+      background: #ffffff;
+      margin: 0;
+      padding: 40px 100px;
+      padding-top: 90px;
+    }
 
-        body {
-            font-family: "Noto Sans TC", sans-serif;
-            background-color: #ffffff;
-            margin: 0;
-            padding: 20px;
-        }
+    /* 頂端列 */
+    .top-bar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 60px;
+      background-color: #fff;
+      z-index: 1100;
+      display: flex;
+      align-items: center;
+    }
 
-        .container {
-            width: 100%;
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 0.5rem;
-        }
+    .top-bar>.container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0 0.5rem;
+      height: 100%;
+      gap: 30px;
+    }
 
-        /* 頂端列 */
-        .top-bar {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 60px;
-            background-color: #fff;
-            z-index: 1100;
-            display: flex;
-            align-items: center;
-        }
+    .top-bar-left #menu-btn {
+      width: 30px;
+      height: 22px;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
 
-        .top-bar>.container {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 0 0.5rem;
-            height: 100%;
-            gap: 30px;
-        }
+    .top-bar-left #menu-btn span {
+      height: 4px;
+      background-color: #333;
+      border-radius: 2px;
+    }
 
-        .top-bar-left #menu-btn {
-            width: 30px;
-            height: 22px;
-            cursor: pointer;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-        }
+    .top-bar-right {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: bold;
+    }
 
-        .top-bar-left #menu-btn span {
-            height: 4px;
-            background-color: #333;
-            border-radius: 2px;
-        }
+    .btn-link {
+      color: #0066cc;
+      border: 1.5px solid #0066cc;
+      padding: 0.3rem 0.7rem;
+      border-radius: 6px;
+      text-decoration: none;
+      transition: all 0.3s ease;
+      font-size: 0.9rem;
+      background-color: transparent;
+    }
 
-        .top-bar-right {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            font-weight: bold;
-        }
+    .btn-link:hover {
+      background-color: #0066cc;
+      color: white;
+    }
 
-        .top-bar-right .btn-link {
-            color: #0066cc;
-            background-color: transparent;
-            border: 1.5px solid #0066cc;
-            padding: 0.3rem 0.7rem;
-            border-radius: 6px;
-            text-decoration: none;
-            transition: background-color 0.3s ease, color 0.3s ease;
-            font-size: 0.9rem;
-        }
+    #login-avatar {
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      object-fit: cover;
+      cursor: pointer;
+    }
 
-        .top-bar-right .btn-link:hover {
-            background-color: #0066cc;
-            color: white;
-        }
+    /* 側邊選單 */
+    #side-menu {
+      position: fixed;
+      top: 0;
+      left: 0;
+      height: 100vh;
+      width: 320px;
+      max-width: 80vw;
+      background-color: rgba(10, 10, 10, 0.95);
+      backdrop-filter: blur(6px);
+      box-shadow: 3px 0 12px rgb(0 0 0 / 0.7);
+      padding: 2rem 1.5rem;
+      transform: translateX(-100%);
+      transition: transform 0.3s ease-in-out;
+      z-index: 1200;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      color: white;
+      user-select: none;
+    }
 
-        .top-bar-right #login-avatar {
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            object-fit: cover;
-            cursor: pointer;
-            margin-top: 6px;
-        }
+    #side-menu h3 {
+      width: 100%;
+      margin-bottom: 1.5rem;
+      font-weight: 700;
+      font-size: 1.5rem;
+      text-align: left;
+    }
 
-        /* 主要內容 */
-        h1 {
-            margin-top: 80px;
-            margin-bottom: 2rem;
-            color: #0066cc;
-            font-weight: 700;
-            font-size: 2rem;
-            text-align: center;
-            letter-spacing: 1px;
-        }
+    #side-menu.open {
+      transform: translateX(0);
+    }
 
-        /* 搜尋欄 */
-        .search-bar,
-        .teacher-select {
-            margin-bottom: 20px;
-            padding: 10px;
-            width: 100%;
-            border-radius: 6px;
-            border: 1px solid #ccc;
-            font-size: 1rem;
-        }
+    #close-btn {
+      position: absolute;
+      top: 2rem;
+      right: 1.6rem;
+      font-size: 2.2rem;
+      background: none;
+      border: none;
+      color: white;
+      cursor: pointer;
+      line-height: 1;
+      width: 2.5rem;
+      height: 2.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
 
-        /* 表格 */
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-bottom: 30px;
-        }
+    #side-menu a {
+      display: block;
+      width: 100%;
+      padding: 0.5rem 0;
+      font-size: 1.1rem;
+      color: #ddd;
+      text-decoration: none;
+      border-radius: 4px;
+      transition: background-color 0.2s ease;
+    }
 
-        th,
-        td {
-            padding: 12px;
-            text-align: left;
-            border-bottom: 1px solid #ddd;
-        }
+    #side-menu a:hover {
+      background-color: rgba(255, 255, 255, 0.15);
+      color: white;
+    }
 
-        th {
-            background-color: #f8f9fa;
-            font-weight: bold;
-        }
+    /* 主內容 */
+    h2 {
+      text-align: center;
+      color: #0066cc;
+      margin-bottom: 25px;
+    }
 
-        tr:hover {
-            background-color: #f1f1f1;
-        }
+    .card {
+      border-radius: 14px;
+      box-shadow: 0 3px 15px rgba(0, 0, 0, 0.05);
+      margin-bottom: 40px;
+    }
 
-        /* 按鈕 */
-        button {
-            padding: 10px 20px;
-            font-size: 1rem;
-            font-weight: bold;
-            border-radius: 6px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
+    .card-header {
+      font-weight: 600;
+      background-color: #e9f3ff;
+      color: #004c97;
+    }
 
-        .approve-btn {
-            background-color: #28a745;
-            color: white;
-        }
+    th,
+    td {
+      text-align: center;
+      vertical-align: middle;
+    }
 
-        .approve-btn:hover {
-            background-color: #218838;
-            box-shadow: 0 4px 10px rgba(40, 167, 69, 0.5);
-        }
+    .btn-action {
+      border: none;
+      border-radius: 6px;
+      padding: 6px 12px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
 
-        .reject-btn {
-            background-color: #dc3545;
-            color: white;
-        }
+    .btn-view {
+      background-color: #0d6efd;
+      color: white;
+    }
 
-        .reject-btn:hover {
-            background-color: #c82333;
-            box-shadow: 0 4px 10px rgba(220, 53, 69, 0.5);
-        }
+    .btn-view:hover {
+      background-color: #0b5ed7;
+    }
 
-        /* 側邊選單 */
-        #side-menu {
-            position: fixed;
-            top: 0;
-            left: 0;
-            height: 100vh;
-            width: 320px;
-            max-width: 80vw;
-            background-color: rgba(10, 10, 10, 0.95);
-            backdrop-filter: blur(6px);
-            box-shadow: 3px 0 12px rgb(0 0 0 / 0.7);
-            padding: 2rem 1.5rem;
-            transform: translateX(-100%);
-            transition: transform 0.3s ease-in-out;
-            z-index: 1100;
-            display: flex;
-            flex-direction: column;
-            align-items: flex-start;
-            color: white;
-            user-select: none;
-        }
+    .btn-approve {
+      background-color: #28a745;
+      color: white;
+    }
 
-        #side-menu.open {
-            transform: translateX(0);
-        }
+    .btn-reject {
+      background-color: #dc3545;
+      color: white;
+    }
 
-        #close-btn {
-            position: absolute;
-            top: 2rem;
-            right: 1.6rem;
-            font-size: 2.2rem;
-            background: none;
-            border: none;
-            color: white;
-            cursor: pointer;
-            line-height: 1;
-            width: 2.5rem;
-            height: 2.5rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
+    h2 {
+      text-align: center;
+      color: #0066cc;
+      margin-bottom: 20px;
+    }
 
-        #side-menu h2 {
-            width: 100%;
-            margin-bottom: 1.5rem;
-            font-weight: 700;
-            font-size: 1.5rem;
-            text-align: left;
-        }
+    .card {
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      border-radius: 10px;
+    }
 
-        #side-menu a {
-            display: block;
-            width: 100%;
-            padding: 0.5rem 0;
-            font-size: 1.1rem;
-            color: #ddd;
-            text-decoration: none;
-            border-radius: 4px;
-            transition: background-color 0.2s ease;
-        }
+    #fileDrop {
+      border: 2px dashed #ccc;
+      border-radius: 8px;
+      padding: 30px;
+      text-align: center;
+      color: #888;
+      cursor: pointer;
+      transition: border-color 0.3s;
+    }
 
-        #side-menu a:hover {
-            background-color: rgba(255, 255, 255, 0.15);
-            color: white;
-        }
+    #fileDrop.dragover {
+      border-color: #0d6efd;
+      color: #0d6efd;
+    }
 
-        /* 無公司時顯示的訊息 */
-        p.no-companies {
-            text-align: center;
-            color: #6c757d;
-            font-style: italic;
-            font-size: 1.1rem;
-            margin-top: 3rem;
-        }
+    table {
+      text-align: center;
+      vertical-align: middle;
+    }
 
-        /* 模態框 */
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.5);
-            justify-content: center;
-            align-items: center;
-        }
+    .company-preview {
+      font-size: 15px;
+      color: #333;
+    }
 
-        .modal-content {
-            background-color: white;
-            padding: 20px;
-            border-radius: 6px;
-            max-width: 600px;
-            max-height: 400px;
-            overflow-y: auto;
-        }
+    .company-preview .section {
+      background: #f9fbfd;
+      border: 1px solid #dee2e6;
+      border-radius: 8px;
+      padding: 18px 20px;
+      margin-bottom: 20px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    }
 
-        .modal.open {
-            display: flex;
-        }
-    </style>
+    .company-preview .section h5 {
+      color: #0056b3;
+      font-weight: 600;
+      margin-bottom: 15px;
+    }
 
-    <script>
-        // 打開描述的模態框
-        function openModal(description) {
-            const modal = document.getElementById("description-modal");
-            const modalContent = document.getElementById("modal-content");
-            modal.style.display = "flex";
-            modalContent.innerHTML = description;
-        }
+    .reject-box {
+      background-color: #fff3f3;
+      border: 1px solid #ffb3b3;
+      color: #c00;
+      border-radius: 6px;
+      padding: 12px;
+    }
 
-        // 關閉模態框
-        function closeModal() {
-            const modal = document.getElementById("description-modal");
-            modal.style.display = "none";
-        }
 
-        async function reviewCompany(companyId, status) {
-            try {
-                const response = await fetch("/api/approve_company", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ company_id: companyId, status: status })
-                });
+    .info-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px 20px;
+    }
 
-                const result = await response.json();
-                alert(result.message);
+    .info-grid .full {
+      grid-column: 1 / -1;
+    }
 
-                if (result.success) {
-                    const companyElement = document.getElementById("company-" + companyId);
-                    if (companyElement) {
-                        companyElement.remove();
-                    }
-                }
-            } catch (error) {
-                alert("發生錯誤：" + error.message);
-            }
-        }
-    </script>
+    .info-grid div {
+      background: #fff;
+      border: 1px solid #e2e6ea;
+      border-radius: 5px;
+      padding: 10px 12px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .info-grid strong {
+      color: #0056b3;
+      font-size: 14px;
+      margin-bottom: 4px;
+    }
+
+    .info-grid span {
+      font-size: 15px;
+      color: #444;
+      white-space: pre-wrap;
+    }
+
+
+    .modal {
+      z-index: 2000 !important;
+    }
+
+    body.modal-open,
+    html.modal-open {
+      overflow: auto;
+      height: 100% !important;
+      padding-right: 0 !important;
+    }
+
+    .modal.show .modal-dialog {
+      transform: translateY(39px) !important;
+    }
+
+    .modal-body {
+      max-height: 70vh;
+      overflow-y: auto;
+    }
+  </style>
 </head>
 
 <body>
-    <!-- 頂部欄 -->
-    <div class="top-bar">
-        <div class="container">
-            <div class="top-bar-left">
-                <div id="menu-btn" title="選單" role="button" tabindex="0">
-                    <span></span><span></span><span></span>
-                </div>
-            </div>
-            <div class="top-bar-right">
-                <a href="/director_home">
-                    <img src="{{ url_for('static', filename='images/avatar.png') }}" alt="頭像" id="login-avatar" />
-                </a>
-                <a href="/director_home" class="btn-link">返回主頁</a>
-                <a href="/login" class="btn-link">登出</a>
-            </div>
+  <!-- ✅ 頂部欄 -->
+  <div class="top-bar">
+    <div class="container">
+      <div class="top-bar-left">
+        <div id="menu-btn" title="選單" role="button" tabindex="0">
+          <span></span><span></span><span></span>
         </div>
-    </div>
+      </div>
 
-    <!-- 主要內容 -->
-    <h1>主任審核公司</h1>
-    <select class="teacher-select" id="teacher-select" name="teacher_id">
-        <option value="" selected>請選擇老師</option>
-        {% for teacher in teachers %}
-        <option value="{{ teacher.id }}">{{ teacher.name }}{% if teacher.role == 'director' %}（主任）{% endif %}</option>
-        {% endfor %}
+      <div class="top-bar-right">
+        <a href="/profile">
+          <img src="{{ url_for('static', filename='images/avatar.png') }}" alt="頭像" id="login-avatar" />
+        </a>
+
+        <div class="dropdown" style="position: relative;">
+          <button id="accountDropdownBtn" class="btn-link" aria-expanded="false">帳號 ▾</button>
+          <div id="accountDropdownMenu" class="dropdown-menu"
+            style="position:absolute; right:0; top:120%; background:#fff; border:1px solid #ccc; border-radius:8px; padding:6px; min-width:160px; display:none; box-shadow:0 4px 12px rgba(0,0,0,.12);">
+            <a href="/profile" class="btn-link" style="display:block; border:none; margin:4px 0;">個人資料</a>
+            <a id="toHomeroomLink" href="/class_teacher_home" class="btn-link"
+              style="display:none; border:none; margin:4px 0;">切換班導身分</a>
+            <a href="/login" class="btn-link" style="display:block; border:none; margin:4px 0;">登出</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 側邊選單 -->
+  <nav id="side-menu" aria-hidden="true" role="navigation" aria-label="功能選單">
+    <button id="close-btn" aria-label="關閉功能選單">×</button>
+    <h3>功能選單</h3>
+    <a href="/director_home">首頁</a>
+    <a href="/approve_company">審核實習單位</a>
+    <a href="/review_resume">審核實習履歷</a>
+    <a href="/notifications">管理公告</a>
+    <a href="/admin_statistics">統計資料</a>
+  </nav>
+
+  <h2>實習公司審核</h2>
+
+  <!-- 篩選列 -->
+  <div class="filter-section d-flex justify-content-end gap-2 mb-3">
+    <input type="text" id="teacherFilter" placeholder="搜尋指導老師姓名..." />
+    <select id="statusFilter">
+      <option value="">全部狀態</option>
+      <option value="pending">待審核</option>
+      <option value="approved">已核准</option>
+      <option value="rejected">已退件</option>
     </select>
-    <div>
-        <input type="text" class="search-bar" id="search-bar" placeholder="搜尋老師..." onkeyup="filterCompanies()" />
-    </div>
+    <button class="btn btn-primary btn-sm" onclick="applyFilter()">篩選</button>
+  </div>
 
-    {% if companies %}
-    <table>
+  <!-- 待審核公司 -->
+  <div class="card">
+    <div class="card-header">待審核公司</div>
+    <div class="card-body">
+      <table class="table table-hover align-middle">
         <thead>
-            <tr>
-                <th>公司名稱</th>
-                <th>描述</th>
-                <th>地點</th>
-                <th>聯絡人</th>
-                <th>Email</th>
-                <th>電話</th>
-                <th>提交時間</th>
-                <th>操作</th>
-            </tr>
+          <tr>
+            <th>#</th>
+            <th>指導老師</th>
+            <th>公司名稱</th>
+            <th>聯絡人</th>
+            <th>Email</th>
+            <th>上傳時間</th>
+            <th>操作</th>
+          </tr>
         </thead>
-        <tbody id="company-list">
-            {% for company in companies %}
-            <tr id="company-{{ company.id }}">
-                <td>{{ company.company_name }}</td>
-                <td>
-                    <button onclick="openModal('{{ company.description or '無描述' }}')">預覽</button>
-                </td>
-                <td>{{ company.location or '—' }}</td>
-                <td>{{ company.contact_person or '—' }}</td>
-                <td>{{ company.contact_email or '—' }}</td>
-                <td>{{ company.contact_phone or '—' }}</td>
-                <td>{{ company.submitted_at }}</td>
-                <td>
-                    <button class="approve-btn" onclick="reviewCompany({{ company.id }}, 'approved')">核准</button>
-                    <button class="reject-btn" onclick="reviewCompany({{ company.id }}, 'rejected')">拒絕</button>
-                </td>
-            </tr>
-            {% endfor %}
+        <tbody id="pendingTable">
+          <tr>
+            <td colspan="7" class="text-muted text-center">載入中...</td>
+          </tr>
         </tbody>
-    </table>
-    {% else %}
-    <p class="no-companies">目前沒有待審核的公司。</p>
-    {% endif %}
-
-    <!-- 描述模態框 -->
-    <div class="modal" id="description-modal">
-        <div class="modal-content" id="modal-content"></div>
-        <button onclick="closeModal()">關閉</button>
+      </table>
     </div>
+  </div>
 
-    <!-- 側邊選單 -->
-    <nav id="side-menu" aria-hidden="true">
-        <button id="close-btn" aria-label="關閉選單">×</button>
-            <h2>功能選單</h2>
-            <a href="/director_home">首頁</a>
-            <a href="/profile">個人資料</a>
-            <a href="/approve_company">審核實習單位</a>
-            <a href="/notifications">管理公告</a>
-            <a href="/admin_statistics">統計資料</a>
-            <a href="/manage_roles">帳號權限設定</a>
-        </nav>
+  <!-- 歷史紀錄 -->
+  <div class="card">
+    <div class="card-header">歷史紀錄</div>
+    <div class="card-body">
+      <table class="table table-hover align-middle">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>指導老師</th>
+            <th>公司名稱</th>
+            <th>狀態</th>
+            <th>上傳時間</th>
+            <th>審核時間</th>
+          </tr>
+        </thead>
+        <tbody id="historyTable">
+          <tr>
+            <td colspan="6" class="text-muted text-center">載入中...</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
 
-    <script>
-        // 搜索功能
-        function filterCompanies() {
-            const filter = document.getElementById('search-bar').value.toLowerCase();
-            const rows = document.getElementById('company-list').getElementsByTagName('tr');
+  <!-- Modal 預覽 -->
+  <div class="modal fade" id="companyModal" tabindex="-1">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body" id="modalBody">
+          <p class="text-muted">載入中...</p>
+        </div>
+        <div class="modal-footer" id="modalFooter"></div>
+      </div>
+    </div>
+  </div>
 
-            Array.from(rows).forEach(row => {
-                const companyName = row.cells[0].textContent.toLowerCase();
-                if (companyName.includes(filter)) {
-                    row.style.display = '';
-                } else {
-                    row.style.display = 'none';
-                }
-            });
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+
+    // 渲染上傳預覽表格
+    function renderTable(jsonData) {
+      previewTableBody.innerHTML = "";
+      parsedData = [];
+
+      if (jsonData.length <= 1) {
+        previewTableBody.innerHTML = `<tr><td colspan="8" class="text-center text-muted">檔案內容為空</td></tr>`;
+        return;
+      }
+
+      for (let i = 1; i < jsonData.length; i++) {
+        const r = jsonData[i];
+        if (r.length === 0) continue;
+        parsedData.push({
+          company_name: r[0] || "",
+          company_intro: r[1] || "",
+          company_address: r[2] || "",
+          contact_name: r[3] || "",
+          contact_title: r[4] || "",
+          contact_phone: r[5] || "",
+          contact_email: r[6] || "",
+          internship_unit: r[7] || "",
+          internship_content: r[8] || "",
+          department: r[9] || "",
+          internship_period: r[10] || "",
+          internship_time: r[11] || "",
+          internship_quota: r[12] || "",
+          remark: r[13] || "",
+          status: "審查中"
+        });
+      }
+      parsedData.forEach((c, idx) => {
+        previewTableBody.innerHTML += `
+          <tr>
+            <td>${idx + 1}</td>
+            <td>${c.company_name}</td>
+            <td>${c.company_address}</td>
+            <td>${c.internship_unit}</td>
+            <td>${c.department}</td>
+            <td>${c.internship_period}</td>
+            <td>${c.internship_quota}</td>
+            <td>
+            </td>
+          </tr>`;
+      });
+
+      document.getElementById("submitBtn").style.display = "inline-block";
+    }
+
+    let allPending = [], allHistory = [];
+
+    document.addEventListener("DOMContentLoaded", () => {
+      loadPending(); loadHistory();
+    });
+
+    function loadPending() {
+      fetch("/api/get_pending_companies").then(r => r.json()).then(d => {
+        if (d.success) { allPending = d.companies; renderTable(allPending, "pendingTable", true); }
+      });
+    }
+
+    function loadHistory() {
+      fetch("/api/get_reviewed_companies").then(r => r.json()).then(d => {
+        if (d.success) { allHistory = d.companies; renderTable(allHistory, "historyTable", false); }
+      });
+    }
+
+    function renderTable(list, id, isPending) {
+      const tb = document.getElementById(id);
+      if (!list.length) {
+        tb.innerHTML = `<tr><td colspan="${isPending ? 7 : 6}" class="text-center text-muted">無資料</td></tr>`;
+        return;
+      }
+      tb.innerHTML = list.map((c, i) => `
+        <tr>
+          <td>${i + 1}</td>
+          <td>${c.upload_teacher_name || "—"}</td>
+          <td>${c.company_name}</td>
+          ${isPending ?
+          `<td>${c.contact_name || "—"}</td><td>${c.contact_email || "—"}</td><td>${c.upload_time || "—"}</td>
+             <td><button class="btn-action btn-view" onclick="openCompanyModal(${c.id}, true)">查看</button></td>`
+          :
+          `<td>${c.status === "approved" ? "通過" : c.status === "rejected" ? "退件" : "—"}</td>
+             <td>${c.upload_time || "—"}</td><td>${c.reviewed_at || "—"}</td>`}
+        </tr>`).join("");
+    }
+
+    async function openCompanyModal(id, isPending = false) {
+      try {
+        const res = await fetch(`/api/get_company_detail?company_id=${id}`);
+        const data = await res.json();
+        if (!data.success) { alert("載入失敗"); return; }
+
+        const c = data.company || {};
+        const body = document.getElementById("modalBody");
+        const footer = document.getElementById("modalFooter");
+
+        const content = `
+      <div class="company-preview">
+        <div class="section">
+          <h5>公司基本資料</h5>
+          <div class="info-grid">
+            <div><strong>公司名稱</strong><span>${c.company_name || "-"}</span></div>
+            <div><strong>公司地址</strong><span>${c.company_address || "-"}</span></div>
+            <div class="full"><strong>公司簡介</strong><span>${c.company_intro || "-"}</span></div>
+          </div>
+        </div>
+
+        <!-- 聯絡資訊 -->
+        <div class="section">
+          <h5>聯絡資訊</h5>
+          <div class="info-grid">
+            <div><strong>聯絡人姓名</strong><span>${c.contact_name || "-"}</span></div>
+            <div><strong>職稱</strong><span>${c.contact_title || "-"}</span></div>
+            <div><strong>聯絡電話</strong><span>${c.contact_phone || "-"}</span></div>
+            <div><strong>電子郵件</strong><span>${c.contact_email || "-"}</span></div>
+          </div>
+        </div>
+
+        <div class="section">
+        <h5>實習職缺資訊</h5>
+        ${c.internship_jobs.map(job => `
+        <div class="info-grid">
+        <div><strong>實習職位</strong><span>${job.internship_unit || '-'}</span></div>
+        <div><strong>所屬部門</strong><span>${job.department || '-'}</span></div>
+        <div><strong>期間</strong><span>${job.internship_period || '-'}</span></div>
+        <div><strong>時段</strong><span>${job.internship_time || '-'}</span></div>
+        <div><strong>名額</strong><span>${job.internship_quota || '-'}</span></div>
+        <div class="full"><strong>實習內容</strong><span>${job.internship_content || '-'}</span></div>
+        <div class="full"><strong>備註</strong><span>${job.remark || '-'}</span></div>
+        </div>
+        `).join('')}
+        </div>
+
+        ${c.status === 'rejected' && c.reject_reason ? `
+        <div class="section reject-box">
+          <h5>退件理由</h5>
+          <div><span>${c.reject_reason}</span></div>
+        </div>` : ''}
+
+      </div>
+    `;
+
+        body.innerHTML = content;
+
+        // footer 按鈕
+        if (isPending) {
+          footer.innerHTML = `
+    <button class="btn btn-success" onclick="approveCompany(${c.id})">通過</button>
+    <button class="btn btn-danger" onclick="rejectCompany(${c.id})">退件</button>
+  `;
+        } else {
+          footer.innerHTML = `<button class="btn btn-secondary" data-bs-dismiss="modal">關閉</button>`;
         }
-    </script>
-    <!-- JS 控制開關 -->
-    <script>
-        // 驗證登入狀態
-        const username = localStorage.getItem("username");
 
-        if (!username) {
-            alert("請先登入！");
-            window.location.href = "/login";
-        }
+        // 顯示 modal
+        const modalEl = document.getElementById("companyModal");
+        const bsModal = new bootstrap.Modal(modalEl);
+        bsModal.show();
 
-        document.getElementById('menu-btn').addEventListener('click', () => {
-            document.getElementById('side-menu').classList.add('open');
+        modalEl.addEventListener("hidden.bs.modal", () => {
+          document.body.classList.remove("modal-open");
         });
 
-        document.getElementById('close-btn').addEventListener('click', () => {
-            document.getElementById('side-menu').classList.remove('open');
-        });
-    </script>
+      } catch (err) {
+        console.error("openCompanyModal error:", err);
+        alert("載入發生錯誤");
+      }
+    }
 
+    function approveCompany(id) {
+      if (!confirm("確定通過這家公司？")) return;
+      fetch(`/api/approve_company`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ company_id: id, status: "approved" })
+      })
+        .then(r => r.json()).then(d => {
+          alert(d.message || "已通過");
+          bootstrap.Modal.getInstance(document.getElementById("companyModal")).hide();
+          loadPending(); loadHistory();
+        });
+    }
+
+
+    function rejectCompany(id) {
+      const reason = prompt("請輸入退件理由：");
+      if (!reason) {
+        alert("請輸入退件理由。");
+        return;
+      }
+      fetch(`/api/reject_company`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ company_id: id, reason })
+      }).then(r => r.json()).then(d => {
+        alert(d.message || "已退件");
+        bootstrap.Modal.getInstance(document.getElementById("companyModal")).hide();
+        loadPending(); loadHistory();
+      });
+    }
+
+    function applyFilter() {
+      const keyword = document.getElementById("teacherFilter").value.trim();
+      const status = document.getElementById("statusFilter").value;
+      const p = allPending.filter(c => !keyword || (c.upload_teacher_name || "").includes(keyword));
+      const h = allHistory.filter(c =>
+        (!keyword || (c.upload_teacher_name || "").includes(keyword)) &&
+        (!status || c.status === status)
+      );
+      renderTable(p, "pendingTable", true);
+      renderTable(h, "historyTable", false);
+    }
+
+    const menuBtn = document.getElementById("menu-btn");
+    const sideMenu = document.getElementById("side-menu");
+    const closeBtn = document.getElementById("close-btn");
+
+    menuBtn.addEventListener("click", () => {
+      sideMenu.classList.add("open");
+      sideMenu.setAttribute("aria-hidden", "false");
+    });
+
+    closeBtn.addEventListener("click", () => {
+      sideMenu.classList.remove("open");
+      sideMenu.setAttribute("aria-hidden", "true");
+    });
+
+    // 如果點擊 menu 以外的地方就關閉選單
+    document.addEventListener("click", (e) => {
+      if (
+        !sideMenu.contains(e.target) &&
+        !menuBtn.contains(e.target)
+      ) {
+        sideMenu.classList.remove("open");
+        sideMenu.setAttribute("aria-hidden", "true");
+      }
+    });
+
+    // 帳號下拉
+    const btn = document.getElementById('accountDropdownBtn');
+    const menu = document.getElementById('accountDropdownMenu');
+    btn.addEventListener('click', () => {
+      const open = menu.style.display === 'block';
+      menu.style.display = open ? 'none' : 'block';
+      btn.setAttribute('aria-expanded', String(!open));
+    });
+    document.addEventListener('click', (e) => {
+      if (!menu.contains(e.target) && !btn.contains(e.target)) {
+        menu.style.display = 'none';
+        btn.setAttribute('aria-expanded', 'false');
+      }
+    });
+
+    // 載入用戶頭像
+    function loadUserAvatar() {
+      console.log('開始載入頭像...');
+      fetch('/api/profile')
+        .then(res => {
+          if (!res.ok) throw new Error('無法取得用戶資料');
+          return res.json();
+        })
+        .then(data => {
+          console.log('API 回應:', data);
+          if (data.success && data.user && data.user.avatar_url) {
+            // 確保頭像URL是完整的路徑，並加上時間戳避免快取
+            const rawUrl = data.user.avatar_url.startsWith('http') ?
+              data.user.avatar_url :
+              window.location.origin + data.user.avatar_url;
+            const avatarUrl = rawUrl + (rawUrl.includes('?') ? '&' : '?') + 't=' + Date.now();
+            console.log('設定頭像URL:', avatarUrl);
+            document.getElementById('login-avatar').src = avatarUrl;
+          } else {
+            console.log('沒有頭像URL或API失敗');
+          }
+        })
+        .catch(err => {
+          console.log('載入頭像失敗:', err);
+          // 保持預設頭像
+        });
+    }
+
+    // 頁面就緒後載入頭像
+    document.addEventListener('DOMContentLoaded', () => {
+      loadUserAvatar();
+    });
+
+    // 判斷是否為班導，顯示切換到班導主頁
+    fetch('/api/profile').then(r => r.json()).then(d => {
+      if (d.success && d.user && d.user.is_homeroom) {
+        const link = document.getElementById('toHomeroomLink');
+        if (link) link.style.display = 'block';
+      }
+    }).catch(() => { });
+  </script>
 </body>
 
 </html>

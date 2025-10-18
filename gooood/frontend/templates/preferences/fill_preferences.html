@@ -5,14 +5,8 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>實習公司志願序填寫</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
   <style>
-    /* 通用樣式 */
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
-
     body {
       font-family: "Noto Sans TC", sans-serif;
       background-color: #ffffff;
@@ -21,400 +15,343 @@
     }
 
     .container {
-      width: 100%;
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 0 0.5rem;
-    }
-
-    /* 頂端列 */
-    .top-bar {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 60px;
-      background-color: #fff;
-      z-index: 1100;
-      display: flex;
-      align-items: center;
-    }
-
-    .top-bar>.container {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 0 0.5rem;
-      height: 100%;
-      gap: 30px;
-    }
-
-    .top-bar-left #menu-btn {
-      width: 30px;
-      height: 22px;
-      cursor: pointer;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-    }
-
-    .top-bar-left #menu-btn span {
-      height: 4px;
-      background-color: #333;
-      border-radius: 2px;
-    }
-
-    .top-bar-right {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      font-weight: bold;
-    }
-
-    .top-bar-right .btn-link {
-      color: #0066cc;
-      background-color: transparent;
-      border: 1.5px solid #0066cc;
-      padding: 0.3rem 0.7rem;
-      border-radius: 6px;
-      text-decoration: none;
-      transition: background-color 0.3s ease, color 0.3s ease;
-      font-size: 0.9rem;
-    }
-
-    .top-bar-right .btn-link:hover {
-      background-color: #0066cc;
-      color: white;
-    }
-
-    .top-bar-right #login-avatar {
-      width: 60px;
-      height: 60px;
-      border-radius: 50%;
-      object-fit: cover;
-      cursor: pointer;
-      margin-top: 6px;
-    }
-
-    header.hero {
-      position: relative;
-      width: 100%;
-      aspect-ratio: 3 / 1;
-      background-image: url('/static/images/title.png');
-      background-size: cover;
-      background-repeat: no-repeat;
-      background-position: center;
-      margin-top: 80px;
-      margin-bottom: 2rem;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    main {
-      background-color: #fff;
-      padding: 2rem;
-      margin-bottom: 3rem;
-    }
-
-    /* 表單樣式 */
-    form {
-      max-width: 600px;
+      max-width: 800px;
       margin: auto;
-      background: #fff;
+    }
+
+    form {
+      background: #ffffff;
       padding: 40px;
-      border-radius: 10px;
-      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      border-radius: 12px;
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
       margin-top: 50px;
     }
 
-    .form-title {
+    h2 {
       font-weight: bold;
-      color: #0066cc;
+      color: #0d6efd;
       text-align: center;
-      margin: 0 auto 3rem auto;
-      max-width: 1200px;
+      margin-bottom: 2rem;
+    }
+
+    h5 {
+      margin-top: 1.5rem;
+      color: #343a40;
+      font-weight: 600;
+      border-bottom: 2px solid #dee2e6;
+      padding-bottom: 6px;
     }
 
     label {
-      font-weight: bold;
+      font-weight: 600;
+      margin-bottom: 6px;
       display: block;
-      margin-top: 20px;
+      color: #495057;
     }
 
     select {
       width: 100%;
-      padding: 10px;
+      padding: 10px 12px;
+      border-radius: 6px;
+      border: 1px solid #ced4da;
       margin-top: 5px;
-      border-radius: 6px;
-      border: 1px solid #ccc;
+      background-color: #fff;
+      font-size: 1rem;
     }
 
-    button {
-      margin-top: 20px;
-      width: 100%;
-      padding: 10px;
-      background-color: #0066cc;
-      color: white;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-      font-size: 1em;
-    }
-
-    button:hover {
-      background-color: #0255a9;
-    }
-
-    #editBtn {
-      background-color: #f2f2f2;
-      color: #333;
-      border: 1px solid #999;
-      font-weight: bold;
-    }
-
-    #editBtn:hover {
-      background-color: #ddd;
-      color: black;
-    }
-
-    /* 側邊選單 */
-    #side-menu {
-      position: fixed;
-      top: 0;
-      left: 0;
-      height: 100vh;
-      width: 320px;
-      max-width: 80vw;
-      background-color: rgba(10, 10, 10, 0.95);
-      backdrop-filter: blur(6px);
-      box-shadow: 3px 0 12px rgb(0 0 0 / 0.7);
-      padding: 2rem 1.5rem;
-      transform: translateX(-100%);
-      transition: transform 0.3s ease-in-out;
-      z-index: 1100;
-      display: flex;
-      flex-direction: column;
-      align-items: flex-start;
-      color: white;
-      user-select: none;
-    }
-
-    #side-menu.open {
-      transform: translateX(0);
-    }
-
-    #close-btn {
-      position: absolute;
-      top: 2rem;
-      right: 1.6rem;
-      font-size: 2.2rem;
-      background: none;
-      border: none;
-      color: white;
-      cursor: pointer;
-      width: 2.5rem;
-      height: 2.5rem;
-      display: flex;
+    .company-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr auto;
+      gap: 12px;
       align-items: center;
-      justify-content: center;
+      margin-top: 8px;
     }
 
-    #side-menu h2 {
-      margin-bottom: 1.5rem;
-      font-size: 1.5rem;
-      font-weight: bold;
+    .btn-view {
+      background-color: #e9ecef;
+      border: 1px solid #adb5bd;
+      color: #495057;
+      padding: 8px 14px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.95rem;
+      transition: background-color 0.2s ease;
     }
 
-    #side-menu a {
-      color: #ddd;
-      text-decoration: none;
-      padding: 0.5rem 0;
+    .btn-view:hover {
+      background-color: #dee2e6;
+    }
+
+    button[type="submit"] {
+      margin-top: 40px;
       width: 100%;
+      padding: 12px;
+      font-size: 1.1rem;
+      background-color: #0d6efd;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background-color 0.2s ease;
+    }
+
+    button[type="submit"]:hover {
+      background-color: #0b5ed7;
+    }
+
+    .modal-content {
+      border-radius: 12px;
+      padding: 1.5rem;
+      background-color: #fff;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+    }
+
+    .modal-title {
+      font-weight: bold;
+      color: #0d6efd;
+    }
+
+    .info-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px 20px;
+      margin-bottom: 1rem;
+    }
+
+    .info-grid div strong {
       display: block;
-      transition: 0.2s;
+      color: #495057;
+      font-size: 0.9rem;
+      margin-bottom: 4px;
     }
 
-    #side-menu a:hover {
-      background-color: rgba(255, 255, 255, 0.15);
-      color: white;
+    .info-grid div span {
+      display: block;
+      font-size: 1rem;
+      color: #212529;
     }
 
-    /* Toast 浮動通知樣式 */
-    #toast {
-      visibility: hidden;
-      min-width: 250px;
-      background-color: #4CAF50;
-      /* 綠色背景 */
-      color: white;
-      text-align: center;
+    .info-grid .full {
+      grid-column: 1 / -1;
+    }
+
+    @media (max-width: 768px) {
+      .company-row {
+        grid-template-columns: 1fr;
+      }
+
+      .info-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .btn-view {
+        width: 100%;
+        text-align: center;
+      }
+
+      button[type="submit"] {
+        font-size: 1rem;
+      }
+    }
+
+    .company-preview .section {
+      background: #f9fbfd;
+      border: 1px solid #dee2e6;
       border-radius: 8px;
-      padding: 16px;
-      position: fixed;
-      z-index: 1500;
-      left: 50%;
-      bottom: 30px;
-      transform: translateX(-50%);
-      font-weight: bold;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-      opacity: 0;
-      transition: opacity 0.5s ease, visibility 0.5s;
+      padding: 18px 20px;
+      margin-bottom: 20px;
     }
 
-    #toast.show {
-      visibility: visible;
-      opacity: 1;
-    }
-
-    #toast {
-      visibility: hidden;
-      min-width: 250px;
-      background-color: #4CAF50;
-      color: white;
-      text-align: center;
-      border-radius: 8px;
-      padding: 16px;
-      position: fixed;
-      z-index: 1500;
-      left: 50%;
-      bottom: 30px;
-      transform: translateX(-50%);
-      font-weight: bold;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-      opacity: 0;
-      transition: opacity 0.5s ease, visibility 0.5s;
-    }
-
-    #toast.show {
-      visibility: visible;
-      opacity: 1;
+    .company-preview .section h5 {
+      color: #0056b3;
+      font-weight: 600;
+      margin-bottom: 15px;
     }
   </style>
 </head>
 
 <body>
-  <!-- 頂部欄 -->
-  <div class="top-bar">
-    <div class="container">
-      <div class="top-bar-left">
-        <div id="menu-btn" title="選單" role="button" tabindex="0">
-          <div id="toast"></div>
-          <span></span><span></span><span></span>
+  <div class="container">
+    <form id="preferencesForm" method="POST" action="/fill_preferences">
+      <h2 class="text-center text-primary mb-4">請填寫實習公司志願序</h2>
+
+      {% for i in range(1, 6) %}
+      <div class="mb-4">
+        <label>第 {{ i }} 志願</label>
+        <div class="company-row">
+          <select name="company_{{ i }}" class="form-select company-select" required>
+            <option value="">-- 請選擇公司 --</option>
+            {% for company in companies %}
+            <option value="{{ company['id'] }}">{{ company['company_name'] }}</option>
+            {% endfor %}
+          </select>
+
+          <select name="job_{{ i }}" class="form-select job-select" required>
+            <option value="">-- 請先選擇公司 --</option>
+          </select>
+
+          <button type="button" class="btn-view" onclick="viewDetail(this)">查看</button>
         </div>
       </div>
-      <div class="top-bar-right">
-        <a href="/student_home">
-          <img src="{{ url_for('static', filename='images/avatar.png') }}" alt="頭像" id="login-avatar" />
-        </a>
-        <a href="/student_home" class="btn-link">返回主頁</a>
-        <a href="/login" class="btn-link">登出</a>
+      {% endfor %}
+
+      <button type="submit">送出志願</button>
+    </form>
+  </div>
+
+  <!-- 詳細資料 Modal -->
+  <div class="modal fade" id="companyModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+      <div class="modal-content">
+        <div class="modal-header border-0">
+          <h5 class="modal-title">公司詳細資料</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body" id="modalBody">載入中...</div>
       </div>
     </div>
   </div>
 
-  <!-- Toast 通知容器 -->
-  <div id="toast"></div>
-
-  <!-- 志願表單 -->
-  <form method="POST" action="/fill_preferences" id="preferencesForm">
-    <h2 class="form-title">請填寫實習公司志願序</h2>
-    {% for i in range(1, 6) %}
-    <label for="preference_{{ i }}">第 {{ i }} 志願</label>
-    <select id="preference_{{ i }}" class="preference-select" name="preference_{{ i }}" required>
-      <option value="">-- 請選擇實習公司 --</option>
-      {% for company in companies %}
-      <option value="{{ company['id'] }}" {% if submitted_preferences and submitted_preferences[i-1]==company['id'] %} selected {% endif %}>
-  {{ company['company_name'] }}（{{ company['job_title'] }}）
-</option>
-      {% endfor %}
-    </select>
-    {% endfor %}
-    <button type="submit" id="submitBtn">送出志願</button>
-    <button type="button" id="editBtn" style="display:none;">修改</button>
-  </form>
-
-  <!-- 側邊選單 -->
-  <nav id="side-menu" aria-hidden="true" role="navigation" aria-label="功能選單">
-    <button id="close-btn" aria-label="關閉功能選單">×</button>
-    <h2>功能選單</h2>
-    <a href="/student_home">首頁</a>
-    <a href="/profile">個人資料</a>
-    <a href="/upload_resume">上傳履歷</a>
-    <a href="/ai_edit_resume">AI修改履歷</a>
-    <a href="/fill_preferences">填寫志願序</a>
-    <a href="/notifications">通知</a>
-  </nav>
-
-  <!-- JS 控制側邊選單開關及志願序選項 -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   <script>
-  // 側邊選單開關
-  document.getElementById('menu-btn').addEventListener('click', () => {
-    document.getElementById('side-menu').classList.add('open');
-    document.getElementById('side-menu').setAttribute('aria-hidden', 'false');
-  });
+    let allCompanies = {};
+    const companyJobCount = {};
 
-  document.getElementById('close-btn').addEventListener('click', () => {
-    document.getElementById('side-menu').classList.remove('open');
-    document.getElementById('side-menu').setAttribute('aria-hidden', 'true');
-  });
-
-  const selects = document.querySelectorAll('.preference-select');
-  const submitBtn = document.getElementById('submitBtn');
-  const editBtn = document.getElementById('editBtn');
-  const toast = document.getElementById('toast');
-
-  // 更新下拉選單顯示
-  function updateOptions() {
-    const selectedValues = Array.from(selects)
-      .map(s => s.value)
-      .filter(val => val !== '');
-
-    selects.forEach(select => {
-      const currentValue = select.value;
-      Array.from(select.options).forEach(option => {
-        if (option.value === '') {
-          option.hidden = false; // 空白選項要保留
-          return;
+    document.addEventListener("DOMContentLoaded", async () => {
+      // 預抓公司詳細資料
+      const companyOptions = document.querySelectorAll(".company-select option[value]");
+      for (let opt of companyOptions) {
+        if (opt.value) {
+          try {
+            const res = await fetch(`/api/get_company_detail?company_id=${opt.value}`);
+            const data = await res.json();
+            if (data.success && data.company) {
+              allCompanies[opt.value] = data.company;
+              companyJobCount[opt.value] = data.company.internship_jobs.length;
+            }
+          } catch (err) {
+            console.error("載入公司資料失敗", err);
+          }
         }
-        // 如果這個值已經被選過，且不是這個 select 的當前值 → 隱藏
-        option.hidden = selectedValues.includes(option.value) && option.value !== currentValue;
+      }
+
+      // 綁定公司變更事件
+      document.querySelectorAll(".company-select").forEach(select => {
+        select.addEventListener("change", (e) => handleCompanyChange(e.target));
       });
     });
-  }
 
-  // 當選項改變時即時更新
-  selects.forEach(select => {
-    select.addEventListener('change', updateOptions);
-  });
+    async function handleCompanyChange(select) {
+      const companyId = select.value;
+      const row = select.closest('.company-row');
+      const jobSelect = row.querySelector('.job-select');
 
-  // 預先初始化
-  updateOptions();
+      jobSelect.innerHTML = '<option value="">載入中...</option>';
 
-  function showToast(message) {
-    toast.textContent = message;
-    toast.classList.add('show');
-    setTimeout(() => {
-      toast.classList.remove('show');
-    }, 3000);
-  }
+      if (!companyId || !allCompanies[companyId]) {
+        jobSelect.innerHTML = '<option value="">-- 請先選擇公司 --</option>';
+        return;
+      }
 
-  editBtn.addEventListener('click', () => {
-    selects.forEach(select => select.disabled = false);
-    submitBtn.style.display = 'block';
-    editBtn.style.display = 'none';
-    updateOptions();
-  });
+      const company = allCompanies[companyId];
+      const selectedJobIds = Array.from(document.querySelectorAll('.job-select')).map(s => s.value).filter(v => v);
 
-  // ✅ 從後端接收 message
-  let toastMessage = {{ message | tojson | safe | default('null', true) }};
+      // 不過濾重複職缺 → 允許重複選同一個職缺
+      const availableJobs = company.internship_jobs;
 
-  if (toastMessage) {
-    selects.forEach(select => select.disabled = true);
-    submitBtn.style.display = 'none';
-    editBtn.style.display = 'block';
-    showToast(toastMessage);
-  }
-</script>
+      if (availableJobs.length === 0) {
+        jobSelect.innerHTML = '<option value="">此公司職缺已被選完</option>';
+        return;
+      }
+
+      if (availableJobs.length === 1) {
+        const job = availableJobs[0];
+        jobSelect.innerHTML = `<option value="${job.id}" selected>${job.title || job.internship_unit || '未命名職位'}</option>`;
+      } else {
+        jobSelect.innerHTML = '<option value="">-- 請選擇職位 --</option>';
+        availableJobs.forEach(job => {
+          const opt = document.createElement('option');
+          opt.value = job.id;
+          opt.textContent = job.title || job.internship_unit || '未命名職位';
+          jobSelect.appendChild(opt);
+        });
+      }
+
+      updateCompanyOptions();
+    }
+
+    function updateCompanyOptions() {
+      const selectedCompanies = Array.from(document.querySelectorAll('.company-select')).map(sel => sel.value).filter(v => v);
+
+      document.querySelectorAll('.company-select').forEach(select => {
+        const current = select.value;
+
+        Array.from(select.options).forEach(opt => {
+          if (!opt.value) return;
+
+          const isSingleJob = companyJobCount[opt.value] === 1;
+
+          // 隱藏公司選項（不只是 disabled）
+          if (isSingleJob && selectedCompanies.includes(opt.value) && opt.value !== current) {
+            opt.hidden = true;
+          } else {
+            opt.hidden = false;
+          }
+        });
+      });
+    }
+
+    async function viewDetail(btn) {
+      const companySelect = btn.closest('.company-row').querySelector('.company-select');
+      const companyId = companySelect.value;
+      const modal = new bootstrap.Modal(document.getElementById('companyModal'));
+      const modalBody = document.getElementById('modalBody');
+
+      if (!companyId || !allCompanies[companyId]) {
+        modalBody.innerHTML = "<p class='text-danger'>資料載入失敗。</p>";
+        modal.show();
+        return;
+      }
+
+      const company = allCompanies[companyId];
+      modalBody.innerHTML = `
+        <div class="company-preview">
+          <div class="section">
+            <h5>公司基本資料</h5>
+            <div class="info-grid">
+              <div><strong>公司名稱</strong><span>${company.company_name || "-"}</span></div>
+              <div><strong>公司地址</strong><span>${company.company_address || "-"}</span></div>
+              <div class="full"><strong>公司簡介</strong><span>${company.company_intro || "-"}</span></div>
+            </div>
+          </div>
+          <div class="section">
+            <h5>聯絡資訊</h5>
+            <div class="info-grid">
+              <div><strong>聯絡人姓名</strong><span>${company.contact_name || "-"}</span></div>
+              <div><strong>職稱</strong><span>${company.contact_title || "-"}</span></div>
+              <div><strong>聯絡電話</strong><span>${company.contact_phone || "-"}</span></div>
+              <div><strong>電子郵件</strong><span>${company.contact_email || "-"}</span></div>
+            </div>
+          </div>
+          <div class="section">
+            <h5>實習職缺資訊</h5>
+            ${company.internship_jobs.map(job => `
+              <div class="info-grid">
+                <div><strong>實習職位</strong><span>${job.title || job.internship_unit || '-'}</span></div>
+                <div><strong>所屬部門</strong><span>${job.department || '-'}</span></div>
+                <div><strong>期間</strong><span>${job.period || job.internship_period || '-'}</span></div>
+                <div><strong>時段</strong><span>${job.work_time || job.internship_time || '-'}</span></div>
+                <div><strong>名額</strong><span>${job.slots || job.internship_quota || '-'}</span></div>
+                <div class="full"><strong>實習內容</strong><span>${job.description || job.internship_content || '-'}</span></div>
+                <div class="full"><strong>備註</strong><span>${job.remark || '-'}</span></div>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      `;
+      modal.show();
+    }
+  </script>
 </body>
 
 </html>

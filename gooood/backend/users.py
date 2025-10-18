@@ -13,7 +13,40 @@ users_bp = Blueprint("users_bp", __name__)
 def teacher_home():
     if 'username' not in session or session.get('role') != 'teacher':
         return redirect(url_for('auth_bp.login_page'))
+    
     return render_template('user_shared/teacher_home.html')
+
+# -------------------------
+# API - 檢查班導師身分
+# -------------------------
+@users_bp.route('/api/check_homeroom_status', methods=['GET'])
+def check_homeroom_status():
+    if 'username' not in session or session.get('role') != 'teacher':
+        return jsonify({"success": False, "message": "請先登入"}), 401
+    
+    user_id = session.get('user_id')
+    if not user_id:
+        return jsonify({"success": False, "message": "找不到使用者ID"}), 401
+    
+    conn = get_db()
+    cursor = conn.cursor()
+    try:
+        cursor.execute("""
+            SELECT 1 FROM classes_teacher
+            WHERE teacher_id = %s AND role = '班導師'
+        """, (user_id,))
+        is_homeroom = cursor.fetchone() is not None
+        
+        return jsonify({
+            "success": True,
+            "is_homeroom": is_homeroom
+        })
+    except Exception as e:
+        print(f"檢查班導師身分錯誤: {e}")
+        return jsonify({"success": False, "message": "伺服器錯誤"}), 500
+    finally:
+        cursor.close()
+        conn.close()
 
 # -------------------------
 # 老師首頁(班導)
@@ -37,20 +70,15 @@ def class_teacher_home():
         is_homeroom = cursor.fetchone()
 
         if is_homeroom is None:
-            original_role = session.get('original_role')
-            if original_role == 'teacher':
-                return redirect(url_for('users_bp.teacher_home'))
-            elif original_role == 'director':
-                return redirect(url_for('users_bp.director_home'))
-            else:
-                return redirect(url_for('auth_bp.login_page'))
+            # 沒有班導身分就不能看這頁
+            return redirect(url_for('auth_bp.login_page'))
     finally:
         cursor.close()
         conn.close()
 
     return render_template('user_shared/class_teacher_home.html',
         username=session.get('username'),
-        original_role=session.get('original_role', 'teacher')
+        original_role=session.get('role')
     )
 
 # -------------------------
@@ -69,7 +97,7 @@ def get_profile():
     try:
         cursor.execute("""
             SELECT u.id, u.username, u.email, u.role, u.name,
-                   c.department, c.name AS class_name, u.class_id
+                   c.department, c.name AS class_name, u.class_id, u.avatar_url
             FROM users u
             LEFT JOIN classes c ON u.class_id = c.id
             WHERE u.username = %s AND u.role = %s
@@ -135,7 +163,9 @@ def save_profile():
         "學生": "student",
         "教師": "teacher",
         "主任": "director",
-        "管理員": "admin"
+        "科助": "ta",
+        "管理員": "admin",
+        "訪客": "visitor"
     }
     role = role_map.get(role_display)
     if not role:
@@ -152,7 +182,7 @@ def save_profile():
 
         if role == "student":
             if not class_id:
-                return jsonify({"success": False, "message": "學生需提供班級"}), 400
+                return jsonify({"success": False, "message": f"{role_display}需提供班級"}), 400
             try:
                 class_id = int(class_id)
             except ValueError:
@@ -163,7 +193,14 @@ def save_profile():
                 return jsonify({"success": False, "message": "班級不存在"}), 404
 
             cursor.execute("UPDATE users SET class_id=%s WHERE username=%s AND role=%s",
-                           (class_id, username, role))
+                           (class_id, username, role)
+            )
+        else:
+            # 非學生身分一律清空 class_id（避免舊資料殘留）
+            cursor.execute(
+                "UPDATE users SET class_id=NULL WHERE username=%s AND role=%s",
+                (username, role)
+            )
 
         conn.commit()
         return jsonify({"success": True, "message": "資料更新成功"})
@@ -193,12 +230,30 @@ def upload_avatar():
     file = request.files['avatar']
     if file and allowed_file(file.filename):
         filename = secure_filename(f"{session['user_id']}.png")
-        filepath = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
-
-        os.makedirs(current_app.config['UPLOAD_FOLDER'], exist_ok=True)
+        
+        # 確保 avatars 資料夾存在
+        avatars_folder = os.path.join(current_app.static_folder, "avatars")
+        os.makedirs(avatars_folder, exist_ok=True)
+        
+        # 儲存到 static/avatars 資料夾
+        filepath = os.path.join(avatars_folder, filename)
         file.save(filepath)
 
         avatar_url = url_for('static', filename=f"avatars/{filename}")
+        
+        # 將頭像URL保存到資料庫
+        conn = get_db()
+        cursor = conn.cursor()
+        try:
+            cursor.execute("UPDATE users SET avatar_url = %s WHERE id = %s", (avatar_url, session['user_id']))
+            conn.commit()
+        except Exception as e:
+            print("❌ 更新頭像URL錯誤:", e)
+            return jsonify({"success": False, "message": "更新頭像URL失敗"}), 500
+        finally:
+            cursor.close()
+            conn.close()
+        
         return jsonify({"success": True, "avatar_url": avatar_url})
     else:
         return jsonify({"success": False, "message": "檔案格式錯誤"}), 400
@@ -250,6 +305,12 @@ def change_password():
 def student_home():
     return render_template('user_shared/student_home.html')
 
+# 實習廠商主頁 (新增：對應 visitor_home.html)
+@users_bp.route('/visitor_home')
+def visitor_home():
+    # 廠商主頁/訪客登入的頁面
+    return render_template('visitor_home.html')
+
 # 使用者首頁 (主任前台)
 @users_bp.route('/director_home')
 def director_home():
@@ -286,7 +347,16 @@ def director_home():
 @users_bp.route('/ta_home')
 def ta_home():
     return render_template('user_shared/ta_home.html')
+    
+# 實習廠商管理
+@users_bp.route('/manage_companies')
+def manage_companies():
+    return render_template('user_shared/manage_companies.html')
 
+# 志願序最終結果
+@users_bp.route('/final_results')
+def final_results():
+    return render_template('user_shared/final_results.html')
 
 # 管理員首頁（後台）
 @users_bp.route('/admin_home')
@@ -308,5 +378,3 @@ def get_session():
             "role": session["role"]
         })
     return jsonify({"success": False}), 401
-
-

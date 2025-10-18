@@ -75,12 +75,12 @@
     }
 
     .top-bar-right #login-avatar {
-      width: 60px;
-      height: 60px;
+      width: 40px;
+      height: 40px;
       border-radius: 50%;
       object-fit: cover;
       cursor: pointer;
-      margin-top: 4px;
+      margin-top: 6px;
     }
 
     /* Hero 區塊 */
@@ -303,7 +303,6 @@
 </head>
 
 <body>
-  <!-- 頂部欄 -->
   <div class="top-bar">
     <div class="container">
       <div class="top-bar-left">
@@ -312,17 +311,16 @@
         </div>
       </div>
       <div class="top-bar-right">
-        <a href="/student_home">
-          <img src="{{ url_for('static', filename='images/avatar.png') }}" alt="頭像" id="login-avatar" />
+        <a href="#" id="avatarLink">
+        <img src="{{ url_for('static', filename='images/avatar.png') }}" alt="頭像" id="login-avatar" />
         </a>
-        <a href="/student_home" class="btn-link">返回主頁</a>
+        <a href="#" id="homeButtonLink" class="btn-link">返回主頁</a>
         <a href="/login" class="btn-link">登出</a>
       </div>
     </div>
   </div>
 
   <div class="container my-5">
-    <!-- 上傳區塊 -->
     <div class="card p-4 mb-4">
       <h4 class="mb-3 text-center">上傳履歷</h4>
       <div id="resumeFileDrop">拖曳檔案至此或點擊選擇（限 PDF / Word，最大 5MB）</div>
@@ -334,7 +332,6 @@
       <div class="mt-3"><strong>審查進度：</strong><span id="reviewStatus" class="text-muted">尚未上傳</span></div>
     </div>
 
-    <!-- 篩選按鈕 -->
     <div class="btn-group mb-3 w-100" role="group">
       <button class="btn btn-outline-secondary active" onclick="filterStatus('all', this)">全部</button>
       <button class="btn btn-outline-info" id="uploadedCountBtn" onclick="filterStatus('uploaded', this)">已上傳</button>
@@ -343,7 +340,6 @@
       <button class="btn btn-outline-danger" id="rejectedCountBtn" onclick="filterStatus('rejected', this)">已退件</button>
     </div>
 
-    <!-- 清單區塊 -->
     <div class="card p-3">
       <table class="table table-hover align-middle mb-0">
         <thead class="table-light">
@@ -364,7 +360,6 @@
       </table>
     </div>
   </div>
-  <!-- 側邊選單 -->
   <nav id="side-menu" aria-hidden="true" role="navigation" aria-label="功能選單">
     <button id="close-btn" aria-label="關閉功能選單">×</button>
     <h2>功能選單</h2>
@@ -380,7 +375,8 @@
     let resumesData = [];
     let resumeId = null;
     let interval = null;
-    const role = localStorage.getItem('role') || 'student';
+    // 修正此行：將預設角色從 'student' 改為 'visitor'
+    const role = localStorage.getItem('role') || 'visitor'; 
 
     // 拖曳上傳
     const dropZone = document.getElementById('resumeFileDrop');
@@ -406,27 +402,11 @@
       document.getElementById('uploadBtn').disabled = file.size > 5 * 1024 * 1024;
     }
 
-    document.getElementById('uploadBtn').addEventListener('click', () => {
-      const file = fileInput.files[0];
-      if (!file) return alert("請選擇檔案");
-      const formData = new FormData();
-      formData.append('resume', file);
-      formData.append('username', localStorage.getItem('username') || 'testuser');
-
-      updateStatusText('uploaded');
-
-      fetch('/api/upload_resume', { method: 'POST', body: formData })
-        .then(res => res.json())
-        .then(data => {
-          if (data.success && data.resume_id) {
-            resumeId = data.resume_id;
-            loadResumes();
-            if (interval) clearInterval(interval);
-            interval = setInterval(fetchStatus, 5000);
-          } else {
-            alert("上傳失敗");
-          }
-        });
+  document.getElementById('uploadBtn').addEventListener('click', () => {
+      // 移除所有上傳邏輯和狀態更新
+      
+      // 直接導向登入頁面
+      window.location.href = "/login";
     });
 
     function fetchStatus() {
@@ -451,13 +431,21 @@
     }
 
     function loadResumes() {
-      fetch(`/api/get_student_resumes?username=${localStorage.getItem('username')}`)
+      fetch('/api/get_my_resumes')
         .then(res => res.json())
         .then(data => {
           if (data.success) {
             resumesData = data.resumes;
             renderTable('all');
+          } else {
+             // 處理 API 失敗 (例如 403) 時的表格顯示
+             document.getElementById('resumeTableBody').innerHTML = `<tr><td colspan="6" class="text-center text-muted">載入失敗，請檢查登入狀態或聯繫管理員。</td></tr>`;
           }
+        })
+        .catch(error => {
+            // 處理網路或解析錯誤
+            console.error('Fetching resumes failed:', error);
+            document.getElementById('resumeTableBody').innerHTML = `<tr><td colspan="6" class="text-center text-muted">網路錯誤或伺服器無回應。</td></tr>`;
         });
     }
 
@@ -626,9 +614,31 @@
           }
         });
     }
-    document.addEventListener("DOMContentLoaded", loadResumes);
+
+    // 動態設定頭像和返回主頁連結 (根據 localStorage 中的 role)，並決定是否載入履歷
+    document.addEventListener("DOMContentLoaded", () => {
+        const avatarLink = document.getElementById('avatarLink');
+        const homeButtonLink = document.getElementById('homeButtonLink');
+        
+        let homeUrl;
+        
+        if (role === 'student') {
+            homeUrl = '/student_home';
+            loadResumes(); // 學生登入時才載入履歷資料
+        } else {
+            homeUrl = '/visitor_home';
+             // 訪客或未登入時不執行 API 呼叫，並顯示提示
+             document.getElementById('resumeTableBody').innerHTML = `<tr><td colspan="6" class="text-center text-muted">請先登入以查看您的履歷</td></tr>`;
+        }
+
+        if (avatarLink) {
+            avatarLink.href = homeUrl;
+        }
+        if (homeButtonLink) {
+            homeButtonLink.href = homeUrl;
+        }
+    });
   </script>
-  <!-- JS 控制開關 -->
   <script>
     document.getElementById('menu-btn').addEventListener('click', () => {
       document.getElementById('side-menu').classList.add('open');

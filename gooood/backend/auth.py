@@ -44,6 +44,8 @@ def login():
 
         if len(matching_roles) > 1:
             session["pending_roles"] = matching_roles 
+            session["username"] = matched_user["username"]
+            session["user_id"] = matched_user["id"]
             return jsonify({
                 "success": True,
                 "username": matched_user["username"],
@@ -59,7 +61,7 @@ def login():
 
         if single_role == "student":
             redirect_page = "/student_home"
-        if single_role == "ta":
+        elif single_role == "ta":
             redirect_page = "/ta_home"
         elif single_role == "teacher":
             cursor.execute("""
@@ -96,42 +98,55 @@ def login():
 # -------------------------
 @auth_bp.route('/api/confirm-role', methods=['POST'])
 def api_confirm_role():
-    if "username" not in session or "user_id" not in session:
+    if "username" not in session:
         return jsonify({"success": False, "message": "請先登入"}), 401
 
     data = request.get_json()
     role = data.get("role")
+    username = session.get("username")
 
     if role not in ['teacher', 'director', 'student', 'admin']:
         return jsonify({"success": False, "message": "角色錯誤"}), 400
 
-    user_id = session["user_id"]
     conn = get_db()
-    cursor = conn.cursor()
+    cursor = conn.cursor(dictionary=True)
 
     try:
-        redirect_page = "/"
-        if role == "teacher" or role == "director":
+        # ✅ 重新查出該帳號對應此角色的使用者資料
+        cursor.execute("SELECT * FROM users WHERE username = %s AND role = %s", (username, role))
+        user = cursor.fetchone()
+
+        if not user:
+            return jsonify({"success": False, "message": "找不到該角色的使用者資料"}), 404
+
+        user_id = user["id"]
+
+        redirect_page = f"/{role}_home"
+        is_homeroom = False
+
+        # 檢查是否為班導師（僅記錄，不自動重導向）
+        if role in ["teacher", "director"]:
             cursor.execute("""
                 SELECT 1 FROM classes_teacher
                 WHERE teacher_id = %s AND role = '班導師'
             """, (user_id,))
-            is_homeroom = cursor.fetchone()
+            is_homeroom = bool(cursor.fetchone())
 
-            if is_homeroom:
-                redirect_page = "/class_teacher_home"
-            else:
-                redirect_page = f"/{role}_home"
-        else:
-            redirect_page = f"/{role}_home"
-
+        # ✅ 更新 session — 指向正確角色的使用者
+        session["user_id"] = user_id
         session["role"] = role
-        session["original_role"] = role 
+        session["original_role"] = role
+        session["is_homeroom"] = is_homeroom
+        
 
-        return jsonify({"success": True, "redirect": redirect_page})
+        return jsonify({
+            "success": True,
+            "redirect": redirect_page,
+            "is_homeroom": is_homeroom
+        })
 
     except Exception as e:
-        print("確認角色錯誤:", e)
+        print("❌ 確認角色錯誤:", e)
         return jsonify({"success": False, "message": "伺服器錯誤"}), 500
     finally:
         cursor.close()
@@ -195,25 +210,11 @@ def index_page():
     if not role:
         return redirect(url_for("auth_bp.login_page"))
 
-    # 老師和主任都要檢查是否為班導
-    if role in ["teacher", "director"]:
-        conn = get_db()
-        cursor = conn.cursor()
-        cursor.execute("""
-            SELECT 1 FROM classes_teacher 
-            WHERE teacher_id = %s AND role = '班導師'
-        """, (user_id,))
-        is_homeroom = cursor.fetchone()
-        cursor.close()
-        conn.close()
-
-        if is_homeroom:
-            return redirect(url_for('users_bp.class_teacher_home'))
-        else:
-            if role == "teacher":
-                return redirect(url_for('users_bp.teacher_home'))
-            else:
-                return redirect(url_for('users_bp.director_home'))
+    # 老師和主任統一重導向到對應頁面，不自動檢查班導師身分
+    if role == "teacher":
+        return redirect(url_for('users_bp.teacher_home'))
+    elif role == "director":
+        return redirect(url_for('users_bp.director_home'))
 
     elif role == "student":
         return redirect(url_for('users_bp.student_home')) 
@@ -246,7 +247,15 @@ def login_confirm_page():
     if not roles:
         return redirect(url_for("auth_bp.login_page"))
 
-    return render_template("auth/login-confirm.html", roles_json=json.dumps(roles))
+    return render_template("auth/login-confirm.html", roles_json=roles)
+  
+# 訪客首頁頁面（不需登入）
+@auth_bp.route("/visitor_home")
+def visitor_home():
+    # 不驗證 session，允許訪客進入
+    session["role"] = "guest"
+    session["username"] = "guest"
+    return render_template("user_shared/visitor_home.html")
   
 # 學生註冊
 @auth_bp.route("/register_student")

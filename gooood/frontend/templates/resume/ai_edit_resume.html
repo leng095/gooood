@@ -1,12 +1,145 @@
 <!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>AI修改履歷</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI 履歷修改平台</title>
+  <style>
+    body {
+      font-family: "Noto Sans TC", sans-serif;
+      background: #f7f9fc;
+      margin: 0;
+      padding: 0;
+    }
+    header {
+      background: #2a4365;
+      color: white;
+      padding: 1rem 2rem;
+      text-align: center;
+      font-size: 1.5rem;
+    }
+    .container {
+      max-width: 800px;
+      margin: 2rem auto;
+      background: white;
+      padding: 2rem;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    .upload-box {
+      border: 2px dashed #90cdf4;
+      border-radius: 8px;
+      text-align: center;
+      padding: 2rem;
+      margin-bottom: 1rem;
+      color: #2b6cb0;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    .upload-box.dragover {
+      background: #ebf8ff;
+    }
+    .file-name {
+      margin: 0.5rem 0 1rem;
+      font-size: 0.95rem;
+      color: #4a5568;
+    }
+    .btn {
+      display: inline-block;
+      background: #2b6cb0;
+      color: white;
+      padding: 0.6rem 1.2rem;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 1rem;
+      transition: background 0.3s;
+    }
+    .btn:hover {
+      background: #2c5282;
+    }
+    textarea {
+      width: 100%;
+      height: 200px;
+      border-radius: 8px;
+      padding: 1rem;
+      border: 1px solid #cbd5e0;
+      resize: vertical;
+      margin-top: 1rem;
+      font-size: 1rem;
+      line-height: 1.6;
+    }
+    h2 {
+      margin-top: 2rem;
+      font-size: 1.3rem;
+      color: #2d3748;
+    }
+  </style>
 </head>
 <body>
-  <h1>AI修改履歷</h1>
-  <p>此頁面將提供使用AI協助修改履歷內容的功能。</p>
+  <header>AI 履歷修改</header>
+  <div class="container">
+    <!-- 上傳區 -->
+    <div class="upload-box" id="uploadBox">
+      📄 點擊或拖曳上傳履歷檔案
+      <input type="file" id="file" accept=".doc,.docx,.pdf,.txt" style="display:none">
+    </div>
+    <div class="file-name" id="fileName">尚未選擇檔案</div>
+
+    <!-- 按鈕 -->
+    <button class="btn" onclick="simulateAI()">✨ 使用 AI 修改履歷</button>
+    
+    <!-- 輸出區 -->
+    <h2>修改後的履歷</h2>
+    <textarea id="output" placeholder="AI 修改後的內容將顯示在這裡..." readonly></textarea>
+  </div>
+
+  <script>
+    const uploadBox = document.getElementById('uploadBox');
+    const fileInput = document.getElementById('file');
+    const fileName = document.getElementById('fileName');
+
+    // 點擊觸發
+    uploadBox.addEventListener('click', () => fileInput.click());
+
+    // 選檔顯示
+    fileInput.addEventListener('change', () => {
+      if (fileInput.files.length > 0) {
+        fileName.textContent = "已選擇檔案：" + fileInput.files[0].name;
+      } else {
+        fileName.textContent = "尚未選擇檔案";
+      }
+    });
+
+    // 拖曳效果
+    uploadBox.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      uploadBox.classList.add('dragover');
+    });
+
+    uploadBox.addEventListener('dragleave', () => {
+      uploadBox.classList.remove('dragover');
+    });
+
+    uploadBox.addEventListener('drop', (e) => {
+      e.preventDefault();
+      uploadBox.classList.remove('dragover');
+      if (e.dataTransfer.files.length > 0) {
+        fileInput.files = e.dataTransfer.files;
+        fileName.textContent = "已選擇檔案：" + fileInput.files[0].name;
+      }
+    });
+
+    // 模擬 AI 修改
+    function simulateAI() {
+      const output = document.getElementById("output");
+      
+      // 1. 清空內容
+      output.value = ""; 
+      
+      // 2. 導向登入頁面
+      window.location.href = "/login";
+    }
+  </script>
 </body>
 </html>
